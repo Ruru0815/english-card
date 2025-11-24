@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期末考複習 (Final Exam)</title>
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --secondary: #eff6ff;
+            --text-main: #1f2937;
+            --border: #e5e7eb;
+            --accent: #f59e0b; /* 挑戰模式橘色 */
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 { margin: 0; color: var(--primary); font-size: 24px; }
+
+        .back-btn {
+            text-decoration: none;
+            color: #666;
+            font-weight: bold;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .back-btn:hover { background: #eee; }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .toggle-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* 挑戰按鈕 */
+        .challenge-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            transition: transform 0.2s;
+        }
+        .challenge-btn:hover { background-color: #d97706; transform: translateY(-2px); }
+
+        /* 句子列表樣式 */
+        .category-title {
+            background: var(--secondary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sentence-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+        .sentence-row:hover { background-color: #f9f9f9; }
+
+        .en-text {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .en-text:hover { text-decoration: underline; }
+        .speaker-icon { font-size: 16px; opacity: 0.6; }
+
+        .zh-text {
+            flex: 1;
+            text-align: right;
+            color: #4b5563;
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .hide-zh .zh-text { opacity: 0; pointer-events: none; }
+
+        /* --- 挑戰模式全螢幕 (Overlay) --- */
+        .flashcard-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 500;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card-box {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid var(--secondary);
+        }
+
+        .card-zh {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .card-en {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 30px;
+            display: none; /* 預設隱藏 */
+            padding: 20px;
+            background: var(--secondary);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .fc-controls button {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-reveal { background: var(--text-main); color: white; }
+        .btn-next { background: var(--primary); color: white; display: none; }
+        .btn-exit { background: transparent; color: #999; border: 1px solid #ddd !important; }
+
+        .progress {
+            margin-top: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="list-view">
+        <header>
+            <h1>✈️ 期末考句型複習</h1>
+            <a href="index.html" class="back-btn">← 回字典</a>
+        </header>
+
+        <div class="controls">
+            <button class="challenge-btn" onclick="startFlashcardMode()">
+                🔥 極限挑戰 (中翻英)
+            </button>
+
+            <label class="toggle-label">
+                <input type="checkbox" id="toggle-zh" onchange="toggleChinese()"> 
+                <span style="margin-left:8px;">🙈 列表遮住中文</span>
+            </label>
+        </div>
+
+        <div id="content-area">
+            </div>
+    </div>
+
+    <div class="flashcard-overlay" id="flashcard-view">
+        <div class="card-box">
+            <div style="color:var(--accent); font-weight:bold; margin-bottom:10px;">請翻譯成英文：</div>
+            
+            <div class="card-zh" id="fc-zh">題目載入中...</div>
+            
+            <div class="card-en" id="fc-en" onclick="speak(this.textContent)">
+                Answer
+            </div>
+
+            <div class="fc-controls">
+                <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">👀 看英文</button>
+                <button class="btn-next" id="btn-next" onclick="nextCard()">下一題 ➔</button>
+            </div>
+
+            <div class="fc-controls" style="margin-top:20px;">
+                <button class="btn-exit" onclick="exitFlashcard()">退出模式</button>
+            </div>
+
+            <div class="progress">
+                題數: <span id="fc-current">1</span> / <span id="fc-total">10</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const examData = [
+            {
+                category: "Check-in (辦理登機)",
+                sentences: [
+                    { en: "Where is the check-in counter?", zh: "登機櫃台在那裏？" },
+                    { en: "It's in aisle 4.", zh: "它在第四走道。" },
+                    { en: "It's at the end of the terminal.", zh: "它在航站末端。" },
+                    { en: "Here's the economy-class check-in counter.", zh: "這邊是經濟艙櫃台。" },
+                    { en: "We want to check in.", zh: "我要辦理登機。" },
+                    { en: "May I see your tickets and passports?", zh: "我能看你的機票和護照嗎？" },
+                    { en: "Here you are.", zh: "就在這裏。" },
+                    { en: "We'd like a window seat and an aisle seat.", zh: "我要一個靠窗位子和一個靠走道位子。" },
+                    { en: "How many bags will you check in?", zh: "你的托運行李有幾件？" },
+                    { en: "Please put your bags on the scale.", zh: "請將行李放在磅秤上。" },
+                    { en: "There will be an overweight-luggage charge of thirty dollars.", zh: "超重費是30元。" },
+                    { en: "Here is your boarding card.", zh: "這是你的登機證。" },
+                    { en: "Where is the boarding gate?", zh: "登機門在那裏？" },
+                    { en: "You can board at gate nine at seven-thirty.", zh: "7點30分在9號門登機。" }
+                ]
+            },
+            {
+                category: "Security Check (安檢)",
+                sentences: [
+                    { en: "Please empty out your pockets.", zh: "請把口袋掏空。" },
+                    { en: "Please put all metal objects in this tray.", zh: "請把金屬物品放在盤子裏。" },
+                    { en: "Please go through the metal detector.", zh: "請走過金屬探測門。" }
+                ]
+            },
+            {
+                category: "Boarding (登機)",
+                sentences: [
+                    { en: "Flight PW-854 is now boarding.", zh: "PW-854 班機正在登機。" },
+                    { en: "All passengers on flight PW-854 should proceed to gate nine for boarding.", zh: "PW-854 班機的旅客請到9號登機門登機。" },
+                    { en: "All passengers seated in rows thirty-six to forty-four may now board.", zh: "36排到44排的旅客現在可以登機了。" },
+                    { en: "May I see your boarding pass?", zh: "我可以看你的登機證嗎？" },
+                    { en: "Our seats are at forty-three A and B.", zh: "我們的座在43排A和B。" },
+                    { en: "I get the window seat!", zh: "我坐靠窗座位。" },
+                    { en: "Please put the bag in the overhead compartment.", zh: "請把袋子放在置物箱。" },
+                    { en: "Please keep your seat in the upright position.", zh: "請把椅子豎直。" }
+                ]
+            },
+            {
+                category: "In-Flight Service (機上服務)",
+                sentences: [
+                    { en: "Please keep your seat belt fastened.", zh: "請繫好安全帶。" },
+                    { en: "May I have a pillow and a blanket?", zh: "我能要枕頭和毛毯嗎？" },
+                    { en: "Would you like something to drink?", zh: "你要些飲料嗎？" },
+                    { en: "I would like a glass of orange juice.", zh: "我要一杯柳橙汁。" },
+                    { en: "I'd like a cup of tea.", zh: "我要一杯茶。" },
+                    { en: "Would you like the spicy chicken or the fried beef?", zh: "你要辣雞肉還是炒牛肉？" },
+                    { en: "I'll have the chicken.", zh: "我要雞肉。" },
+                    { en: "I am a vegetarian.", zh: "我吃素。" },
+                    { en: "It's turbulence.", zh: "這是亂流。" }
+                ]
+            },
+            {
+                category: "Immigration (入境移民局)",
+                sentences: [
+                    { en: "What is your last name?", zh: "你姓什麼？" },
+                    { en: "My name is _____.", zh: "我姓 _____。" },
+                    { en: "What is the purpose of your visit?", zh: "你此行的目的是什麼？" },
+                    { en: "Why do you come here?", zh: "你為什麼來這裏？" },
+                    { en: "I come here for tour.", zh: "我來旅遊。" },
+                    { en: "How long are you staying?", zh: "你要停留多久？" },
+                    { en: "We are staying for 2 weeks.", zh: "我們要停留2週。" },
+                    { en: "Where are you staying?", zh: "你要住那裏？" }
+                ]
+            },
+            {
+                category: "Baggage Claim (行李提領)",
+                sentences: [
+                    { en: "The security is tight here.", zh: "這裡的安檢很嚴。" },
+                    { en: "The bags will come out on carousel number twelve.", zh: "行李在12號轉盤。" },
+                    { en: "I want to report a lost bag.", zh: "我要登記一件失落行李。" },
+                    { en: "Your suitcase is now in Tokyo.", zh: "你的行李在東京。" },
+                    { en: "Please fill out this form.", zh: "請填表格。" }
+                ]
+            },
+            {
+                category: "Customs (海關)",
+                sentences: [
+                    { en: "I filled out the customs-declaration forms.", zh: "我已填好海關申請單了。" },
+                    { en: "It's our turn.", zh: "輪到我們了。" },
+                    { en: "Please put your bags on the counter.", zh: "請把行李放在櫃台上。" },
+                    { en: "Where are you from?", zh: "你來自那裏？" },
+                    { en: "I am from Taiwan.", zh: "我來自台灣。" },
+                    { en: "Here you go.", zh: "這是你要的。" },
+                    { en: "Please open the bag.", zh: "請打開袋子。" },
+                    { en: "Do you have any plants or meat products?", zh: "你有肉類或農產製品嗎？" },
+                    { en: "Do you have any fruits or vegetables?", zh: "你有生鮮蔬果嗎？" },
+                    { en: "We can take a shuttle bus.", zh: "我們可搭接駁車。" }
+                ]
+            },
+            {
+                category: "Transportation (交通)",
+                sentences: [
+                    { en: "How do you get to school?", zh: "你如何上學？" },
+                    { en: "I go to school by scooter.", zh: "我騎機車上學。" },
+                    { en: "How can I get to the station?", zh: "我怎麼去車站？" },
+                    { en: "You can take the bus to the station.", zh: "你可以搭公車去車站。" },
+                    { en: "I'll take the MRT to the park.", zh: "我搭捷運去公園。" }
+                ]
+            }
+        ];
+
+        // --- 初始化頁面 (列表模式) ---
+        const contentArea = document.getElementById('content-area');
+        examData.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            const title = document.createElement('div');
+            title.className = 'category-title'; title.textContent = section.category;
+            sectionDiv.appendChild(title);
+            section.sentences.forEach(item => {
+                const row = document.createElement('div'); row.className = 'sentence-row';
+                row.innerHTML = `<div class="en-text" onclick="speak('${item.en.replace(/'/g, "\\'")}')"><span class="speaker-icon">🔊</span>${item.en}</div><div class="zh-text">${item.zh}</div>`;
+                sectionDiv.appendChild(row);
+            });
+            contentArea.appendChild(sectionDiv);
+        });
+
+        // --- 功能函數 ---
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US'; u.rate = 0.9;
+            window.speechSynthesis.speak(u);
+        }
+
+        function toggleChinese() {
+            const checkbox = document.getElementById('toggle-zh');
+            const container = document.querySelector('.container');
+            if (checkbox.checked) container.classList.add('hide-zh');
+            else container.classList.remove('hide-zh');
+        }
+
+        // --- 挑戰模式 (Flashcard) 邏輯 ---
+        let flashcardQueue = [];
+        let fcIndex = 0;
+
+        function startFlashcardMode() {
+            // 1. 扁平化資料：把所有句子收集到一個陣列
+            flashcardQueue = [];
+            examData.forEach(cat => {
+                cat.sentences.forEach(s => flashcardQueue.push(s));
+            });
+
+            // 2. 隨機打亂 (洗牌)
+            flashcardQueue.sort(() => Math.random() - 0.5);
+
+            // 3. 介面切換
+            fcIndex = 0;
+            document.getElementById('list-view').style.display = 'none'; // 隱藏列表背景，專注考試 (如果你想保留背景可移除這行)
+            document.getElementById('flashcard-view').style.display = 'flex';
+            
+            showCard();
+        }
+
+        function showCard() {
+            // 檢查是否結束
+            if (fcIndex >= flashcardQueue.length) {
+                alert("🎉 恭喜！你已經複習完所有句型了！");
+                exitFlashcard();
+                return;
+            }
+
+            const item = flashcardQueue[fcIndex];
+            
+            // 更新計數
+            document.getElementById('fc-current').textContent = fcIndex + 1;
+            document.getElementById('fc-total').textContent = flashcardQueue.length;
+
+            // 顯示中文，隱藏英文
+            document.getElementById('fc-zh').textContent = item.zh;
+            
+            const enBox = document.getElementById('fc-en');
+            enBox.textContent = item.en; // 放入英文但不顯示
+            enBox.style.display = 'none';
+
+            // 按鈕重置
+            document.getElementById('btn-reveal').style.display = 'inline-block';
+            document.getElementById('btn-next').style.display = 'none';
+        }
+
+        function revealAnswer() {
+            const enBox = document.getElementById('fc-en');
+            enBox.style.display = 'block';
+            
+            // 自動發音
+            speak(enBox.textContent);
+
+            document.getElementById('btn-reveal').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'inline-block';
+        }
+
+        function nextCard() {
+            fcIndex++;
+            showCard();
+        }
+
+        function exitFlashcard() {
+            document.getElementById('flashcard-view').style.display = 'none';
+            document.getElementById('list-view').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
