@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Dictionary & Exam</title>
+    <title>Pro Dictionary & Exam Suite</title>
     <style>
         :root {
             --primary: #1d4ed8;
             --secondary: #f1f5f9;
             --text-main: #111827;
-            --text-light: #6b7280;
-            --font-serif: 'Merriweather', 'Georgia', serif;
-            --font-sans: 'Segoe UI', 'Roboto', sans-serif;
+            --success: #22c55e;
+            --error: #ef4444;
+            --font-serif: 'Merriweather', serif;
+            --font-sans: 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
@@ -21,217 +22,300 @@
             color: var(--text-main);
             height: 100vh;
             overflow-x: hidden;
+            transition: box-shadow 0.3s ease;
         }
 
-        /* --- 導覽列 --- */
+        .glow-success { box-shadow: inset 0 0 50px var(--success) !important; }
+        .glow-error { box-shadow: inset 0 0 50px var(--error) !important; }
+
+        /* Navbar */
         .navbar {
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            box-sizing: border-box;
-            z-index: 100;
+            background: #fff; border-bottom: 1px solid #e5e7eb; padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 100;
         }
-
-        .logo {
-            font-family: var(--font-serif);
-            font-weight: 900;
-            font-size: 24px;
-            color: var(--primary);
+        .logo { font-family: var(--font-serif); font-weight: 900; font-size: 24px; color: var(--primary); }
+        
+        /* 右上角按鈕群組 */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* 按鈕之間的距離 */
         }
 
         .nav-btn {
-            background: white;
+            background: white; border: 1px solid #e5e7eb; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 14px;
+            text-decoration: none; /* 為了讓 a 標籤像按鈕 */
             color: var(--text-main);
-            border: 1px solid #e5e7eb;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
         }
-        .nav-btn:hover { background: var(--secondary); border-color: #d1d5db; }
+        .nav-btn:hover { background: var(--secondary); }
+
+        /* 黃色期末考按鈕樣式 */
+        .btn-final {
+            background-color: #eab308; 
+            color: black;
+            border: 1px solid #ca8a04;
+        }
+        .btn-final:hover { background-color: #ca8a04; }
 
         .badge { background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; }
 
-        /* --- 側邊欄 --- */
+        /* Sidebar */
         .sidebar {
-            position: fixed;
-            top: 0;
-            right: -350px;
-            width: 300px;
-            height: 100vh;
-            background: #f9fafb;
-            border-left: 1px solid #e5e7eb;
-            transition: right 0.3s ease;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
+            position: fixed; top: 0; right: -350px; width: 300px; height: 100vh; background: #f9fafb;
+            border-left: 1px solid #e5e7eb; transition: right 0.3s ease; z-index: 200;
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
             box-shadow: -5px 0 15px rgba(0,0,0,0.05);
         }
         .sidebar.open { right: 0; }
-        .sidebar-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
-        .word-list { flex: 1; overflow-y: auto; }
         .list-item { background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
         
-        /* --- 主畫面 --- */
+        .sidebar-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; font-size: 14px;
+        }
+        .btn-test { background: var(--text-main); color: white; }
+
+        /* Main View */
         .container { margin-top: 80px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; }
-        .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; font-family: var(--font-serif); }
-        .entry-container { display: none; margin-top: 30px; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .entry-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; color: var(--text-main); margin: 0; }
-        
-        .phonetic-group { display: flex; align-items: center; gap: 10px; background: #f3f4f6; padding: 5px 15px; border-radius: 20px; }
-        .phonetic { font-family: 'Lucida Sans Unicode', sans-serif; color: var(--text-light); font-size: 18px; }
-
-        .action-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .action-btn:hover { background: var(--primary); color: white; }
-
-        /* 字典內容 */
-        .pos-section { margin-bottom: 30px; }
-        .pos-label { font-style: italic; font-weight: bold; color: var(--primary); font-size: 18px; display: block; margin-bottom: 10px; }
-        .definition { font-weight: 600; font-size: 18px; margin-bottom: 5px; }
+        .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; }
+        .entry-container { display: none; margin-top: 30px; }
+        .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; margin: 0; }
+        .phonetic-group { display: flex; align-items: center; gap: 10px; background: #f3f4f6; padding: 5px 15px; border-radius: 20px; margin-top: 10px; width: fit-content; }
+        .definition { font-weight: 600; font-size: 18px; margin-bottom: 5px; margin-top: 10px; }
         .definition::before { content: "• "; color: var(--primary); }
-        
-        /* 考試模式 */
-        .exam-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .exam-word { font-family: var(--font-serif); font-size: 56px; font-weight: bold; filter: blur(15px); transition: filter 0.3s; margin: 30px 0; }
-        .exam-word.revealed { filter: blur(0); }
+
+        /* Exam Overlays */
+        .exam-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .mode-select-box { text-align: center; }
+        .mode-btn {
+            display: block; width: 200px; padding: 20px; margin: 10px auto;
+            border: 2px solid var(--primary); border-radius: 12px; background: white;
+            font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .mode-btn:hover { background: var(--primary); color: white; }
+        .exam-box { text-align: center; width: 90%; max-width: 500px; }
+        .audio-big-btn {
+            width: 100px; height: 100px; border-radius: 50%; background: var(--primary); color: white;
+            font-size: 40px; border: none; cursor: pointer; margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(29, 78, 216, 0.3); transition: transform 0.1s;
+        }
+        .audio-big-btn:active { transform: scale(0.95); }
+        .black-box-mask {
+            background-color: black; color: black; padding: 10px 20px; border-radius: 8px; user-select: none;
+            display: inline-block; font-size: 40px; font-weight: bold; font-family: var(--font-serif); min-width: 200px;
+        }
+        .revealed { background-color: transparent; color: var(--text-main); }
+        .type-input {
+            font-size: 32px; text-align: center; padding: 10px; border: none; border-bottom: 3px solid #ddd;
+            outline: none; width: 100%; font-family: var(--font-serif); font-weight: bold; text-transform: lowercase;
+        }
+        .judge-btns { display: none; gap: 20px; justify-content: center; margin-top: 30px; }
+        .btn-judge { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; color: white; }
+        .btn-yes { background: var(--success); }
+        .btn-no { background: var(--error); }
+        .result-box { text-align: center; width: 90%; max-width: 600px; }
+        .score-circle {
+            width: 150px; height: 150px; border-radius: 50%; border: 10px solid var(--primary);
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;
+            font-size: 40px; font-weight: 900; color: var(--primary);
+        }
+        .wrong-list { text-align: left; max-height: 300px; overflow-y: auto; background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .wrong-item { border-bottom: 1px solid #ddd; padding: 8px 0; color: var(--error); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
         <div class="logo">Dictionary</div>
-        <button class="nav-btn" onclick="toggleSidebar()">
-            Saved <span class="badge" id="badge-count">0</span>
-        </button>
+        
+        <div class="nav-actions">
+            <a href="final_exam.html" class="nav-btn btn-final">
+                Final Exam ✈️
+            </a>
+
+            <button class="nav-btn" onclick="toggleSidebar()">
+                Saved <span class="badge" id="badge-count">0</span>
+            </button>
+        </div>
     </nav>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>Vocabulary</h3>
-            <button onclick="toggleSidebar()" style="border:none; background:none; font-size:20px; cursor:pointer;">×</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #eee;">
+            <h3>Word List</h3>
+            <button onclick="toggleSidebar()" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
         </div>
-        <button onclick="startExam()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--text-main); color:white; border:none; cursor:pointer; border-radius:4px;">Start Test</button>
-        <div class="word-list" id="saved-list"></div>
-        <button onclick="clearAll()" style="width:100%; margin-top:10px; border:1px solid red; background:none; color:red; padding:5px; cursor:pointer; border-radius:4px;">Clear All</button>
+        
+        <button class="sidebar-btn btn-test" onclick="showExamSetup()">
+            Start Vocabulary Test 🎓
+        </button>
+
+        <div id="saved-list" style="flex:1; overflow-y:auto; margin-top:10px; border-top:1px solid #eee;"></div>
+        <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%;">Clear All</button>
     </div>
 
     <div class="container" id="main-view">
-        <input type="text" class="search-input" id="word-input" placeholder="Type word..." onkeydown="if(event.key === 'Enter') searchWord()">
-
+        <input type="text" class="search-input" id="word-input" placeholder="Type a word..." onkeydown="if(event.key==='Enter') searchWord()">
         <div class="entry-container" id="entry-result">
-            <div class="entry-header">
-                <h1 class="headword" id="disp-word">Word</h1>
-                
-                <div class="phonetic-group">
-                    <span class="phonetic" id="disp-phonetic">/ ... /</span>
-                    <button class="action-btn" id="btn-audio">🔊</button>
-                </div>
+            <h1 class="headword" id="disp-word">Word</h1>
+            <div class="phonetic-group">
+                <span id="disp-phonetic">/ ... /</span>
+                <button onclick="playAudio()" style="background:none; border:none; cursor:pointer; font-size:20px;">🔊</button>
             </div>
-            
-            <audio id="audio-player"></audio>
             <div id="meanings-area"></div>
         </div>
     </div>
 
-    <div class="exam-overlay" id="exam-view">
-        <button onclick="playExamAudio()" style="width:100px; height:100px; border-radius:50%; font-size:40px; border:none; background:var(--primary); color:white; cursor:pointer; margin-bottom:30px;">🔊</button>
-        <h1 class="exam-word" id="exam-answer">Word</h1>
-        <div style="display:flex; gap:20px;">
-            <button onclick="exitExam()" style="padding:10px 30px; cursor:pointer;">Exit</button>
-            <button onclick="revealAnswer()" id="btn-reveal" style="padding:10px 30px; background:black; color:white; cursor:pointer;">Show Word</button>
-            <button onclick="nextQuestion()" id="btn-next" style="display:none; padding:10px 30px; background:green; color:white; cursor:pointer;">Next</button>
+    <div class="exam-overlay" id="exam-setup">
+        <div class="mode-select-box">
+            <h1>Choose Exam Mode</h1>
+            <button class="mode-btn" onclick="startExam('listening')">👂 Listening Mode<br><span style="font-size:12px; color:#666;">Black box + Self check</span></button>
+            <button class="mode-btn" onclick="startExam('typing')">⌨️ Typing Mode<br><span style="font-size:12px; color:#666;">Type what you hear</span></button>
+            <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <div class="exam-overlay" id="exam-active">
+        <div class="exam-box">
+            <button class="audio-big-btn" onclick="playExamAudio()">🔊</button>
+            <div id="mode-listen-area" style="display:none;">
+                <div id="listen-black-box" class="black-box-mask">WORD</div>
+                <div style="margin-top:40px;"><button id="btn-reveal" onclick="revealListening()" style="padding:10px 30px; font-size:16px; cursor:pointer;">Show Answer</button></div>
+                <div class="judge-btns" id="judge-btns">
+                    <button class="btn-judge btn-no" onclick="handleJudge(false)">❌ Forgot</button>
+                    <button class="btn-judge btn-yes" onclick="handleJudge(true)">✅ Correct</button>
+                </div>
+            </div>
+            <div id="mode-type-area" style="display:none;">
+                <input type="text" id="type-input" class="type-input" placeholder="Type here..." autocomplete="off" onkeydown="if(event.key==='Enter') checkTyping()">
+                <div style="margin-top:20px; color:#999; font-size:14px;">Press Enter to check</div>
+            </div>
+            <div style="margin-top:30px; color:#ccc;"><span id="q-current">1</span> / <span id="q-total">10</span></div>
+            <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Exit</button>
+        </div>
+    </div>
+
+    <div class="exam-overlay" id="result-view">
+        <div class="result-box">
+            <h1>Results</h1>
+            <div class="score-circle"><span id="result-score">0%</span></div>
+            <div style="display:flex; justify-content:space-around; margin-bottom:20px;">
+                <div style="color:var(--success); font-weight:bold;">Correct: <span id="res-correct">0</span></div>
+                <div style="color:var(--error); font-weight:bold;">Wrong: <span id="res-wrong">0</span></div>
+            </div>
+            <h3>Mistakes Review</h3>
+            <div class="wrong-list" id="wrong-container"></div>
+            <button onclick="closeExam()" style="padding:15px 40px; background:var(--primary); color:white; border:none; border-radius:30px; font-size:18px; cursor:pointer;">Close</button>
         </div>
     </div>
 
     <script>
-        // --- 資料 ---
         let myWords = JSON.parse(localStorage.getItem('dictWords')) || [];
+        let currentAudio = null;
         let examQueue = [];
         let examIndex = 0;
+        let examMode = '';
+        let correctCount = 0;
+        let wrongWordsList = [];
 
-        // --- 初始化 ---
         updateBadge();
         renderList();
 
-        // --- 查詢 ---
         async function searchWord() {
             const input = document.getElementById('word-input');
             const word = input.value.trim();
             if(!word) return;
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                if(!res.ok) throw new Error("Not found");
+                if(!res.ok) throw new Error();
                 const data = await res.json();
                 const entry = data[0];
                 document.getElementById('disp-word').textContent = entry.word;
-                
-                let audio = null, text = entry.phonetic || "";
-                const us = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3')) || entry.phonetics.find(p => p.audio);
-                if(us) { audio = us.audio; if(us.text) text = us.text; }
-                
-                document.getElementById('disp-phonetic').textContent = text ? `[ ${text} ]` : "";
-                const btn = document.getElementById('btn-audio');
-                const player = document.getElementById('audio-player');
-                if(audio) { btn.style.display='flex'; player.src=audio; btn.onclick=()=>player.play(); player.play().catch(()=>{}); }
-                else btn.style.display='none';
-
-                const area = document.getElementById('meanings-area'); area.innerHTML = '';
-                entry.meanings.forEach(m => {
-                    const s = document.createElement('div'); s.className='pos-section';
-                    s.innerHTML = `<span class="pos-label">${m.partOfSpeech}</span>`;
-                    m.definitions.forEach(d => {
-                        const div = document.createElement('div'); div.className='definition'; div.textContent = d.definition; s.appendChild(div);
-                    });
-                    area.appendChild(s);
-                });
-                document.getElementById('entry-result').style.display='block'; input.value='';
-                
-                // Save
-                const obj = { id:Date.now(), word:entry.word, audio:audio };
-                myWords = myWords.filter(w => w.word.toLowerCase()!==obj.word.toLowerCase());
-                myWords.unshift(obj); localStorage.setItem('dictWords', JSON.stringify(myWords));
+                let audioSrc = null;
+                const usAudio = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3')) || entry.phonetics.find(p => p.audio);
+                if(usAudio) audioSrc = usAudio.audio;
+                currentAudio = audioSrc;
+                document.getElementById('disp-phonetic').textContent = entry.phonetic || "";
+                document.getElementById('meanings-area').innerHTML = entry.meanings.map(m => `<div><span style="font-style:italic;color:#666;">${m.partOfSpeech}</span><div class="definition">${m.definitions[0].definition}</div></div>`).join('');
+                document.getElementById('entry-result').style.display = 'block';
+                input.value = '';
+                const newWord = { id: Date.now(), word: entry.word, audio: audioSrc };
+                myWords = myWords.filter(w => w.word.toLowerCase() !== newWord.word.toLowerCase());
+                myWords.unshift(newWord);
+                localStorage.setItem('dictWords', JSON.stringify(myWords));
                 renderList(); updateBadge();
             } catch(e) { alert("Word not found"); }
         }
 
-        // --- UI 操作 ---
+        function playAudio() { if(currentAudio) new Audio(currentAudio).play(); }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
         function renderList() {
-            const list = document.getElementById('saved-list'); list.innerHTML = '';
+            const el = document.getElementById('saved-list'); el.innerHTML='';
             myWords.forEach(w => {
-                const d = document.createElement('div'); d.className='list-item';
-                d.innerHTML = `<span onclick="loadWord('${w.word}')">${w.word}</span> <span onclick="delWord(${w.id})" style="color:red;">×</span>`;
-                list.appendChild(d);
+                const div = document.createElement('div'); div.className='list-item';
+                div.innerHTML=`<span onclick="loadFromList('${w.word}')">${w.word}</span> <span onclick="delWord(${w.id})" style="color:red">×</span>`;
+                el.appendChild(div);
             });
         }
-        function loadWord(w) { document.getElementById('word-input').value=w; searchWord(); toggleSidebar(); }
+        function loadFromList(w) { document.getElementById('word-input').value=w; searchWord(); toggleSidebar(); }
         function delWord(id) { myWords=myWords.filter(w=>w.id!==id); localStorage.setItem('dictWords',JSON.stringify(myWords)); renderList(); updateBadge(); }
-        function clearAll() { if(confirm("Clear all?")){ myWords=[]; localStorage.setItem('dictWords',JSON.stringify(myWords)); renderList(); updateBadge(); } }
-        function updateBadge() { document.getElementById('badge-count').textContent=myWords.length; }
+        function clearAll() { if(confirm("Clear?")){myWords=[];localStorage.setItem('dictWords','[]');renderList();updateBadge();} }
+        function updateBadge() { document.getElementById('badge-count').textContent = myWords.length; }
 
-        // --- 考試 ---
-        function startExam() { if(myWords.length===0)return alert("No words"); toggleSidebar(); document.getElementById('main-view').style.display='none'; document.getElementById('exam-view').style.display='flex'; examQueue=[...myWords].sort(()=>Math.random()-0.5); examIndex=0; loadQ(); }
-        function loadQ() { if(examIndex>=examQueue.length){alert("Done"); return exitExam();} const w=examQueue[examIndex]; document.getElementById('exam-answer').textContent=w.word; document.getElementById('exam-answer').classList.remove('revealed'); document.getElementById('btn-reveal').style.display='inline-block'; document.getElementById('btn-next').style.display='none'; setTimeout(()=>playExamAudio(),500); }
-        function playExamAudio() { const w=examQueue[examIndex]; if(w.audio) new Audio(w.audio).play(); else alert("No audio"); }
-        function revealAnswer() { document.getElementById('exam-answer').classList.add('revealed'); document.getElementById('btn-reveal').style.display='none'; document.getElementById('btn-next').style.display='inline-block'; }
-        function nextQuestion() { examIndex++; loadQ(); }
-        function exitExam() { document.getElementById('main-view').style.display='block'; document.getElementById('exam-view').style.display='none'; }
+        function showExamSetup() {
+            if(myWords.length === 0) return alert("Please search and save words first!");
+            toggleSidebar(); document.getElementById('main-view').style.display = 'none'; document.getElementById('exam-setup').style.display = 'flex';
+        }
+        function startExam(mode) {
+            examMode = mode; examQueue = [...myWords].sort(() => Math.random() - 0.5); examIndex = 0; correctCount = 0; wrongWordsList = [];
+            document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'flex';
+            document.getElementById('mode-listen-area').style.display = (mode === 'listening') ? 'block' : 'none';
+            document.getElementById('mode-type-area').style.display = (mode === 'typing') ? 'block' : 'none';
+            loadQuestion();
+        }
+        function loadQuestion() {
+            if(examIndex >= examQueue.length) { showResults(); return; }
+            const currentItem = examQueue[examIndex];
+            document.getElementById('q-current').textContent = examIndex + 1; document.getElementById('q-total').textContent = examQueue.length;
+            if(examMode === 'listening') {
+                const box = document.getElementById('listen-black-box'); box.textContent = currentItem.word; box.classList.remove('revealed');
+                document.getElementById('btn-reveal').style.display = 'inline-block'; document.getElementById('judge-btns').style.display = 'none';
+            } else {
+                const input = document.getElementById('type-input'); input.value = ''; input.focus();
+            }
+            setTimeout(playExamAudio, 500);
+        }
+        function playExamAudio() { const item = examQueue[examIndex]; if(item.audio) new Audio(item.audio).play(); }
+        function checkTyping() {
+            const input = document.getElementById('type-input');
+            if(input.value.trim().toLowerCase() === examQueue[examIndex].word.toLowerCase()) { triggerFeedback('success'); correctCount++; }
+            else { triggerFeedback('error'); wrongWordsList.push(examQueue[examIndex]); }
+            setTimeout(() => { examIndex++; loadQuestion(); }, 1000);
+        }
+        function revealListening() { document.getElementById('listen-black-box').classList.add('revealed'); document.getElementById('btn-reveal').style.display = 'none'; document.getElementById('judge-btns').style.display = 'flex'; }
+        function handleJudge(isCorrect) {
+            if(isCorrect) { triggerFeedback('success'); correctCount++; } else { triggerFeedback('error'); wrongWordsList.push(examQueue[examIndex]); }
+            setTimeout(() => { examIndex++; loadQuestion(); }, 800);
+        }
+        function triggerFeedback(type) {
+            const className = type === 'success' ? 'glow-success' : 'glow-error'; document.body.classList.add(className);
+            setTimeout(() => { document.body.classList.remove(className); }, 800);
+        }
+        function showResults() {
+            document.getElementById('exam-active').style.display = 'none'; document.getElementById('result-view').style.display = 'flex';
+            document.getElementById('res-correct').textContent = correctCount; document.getElementById('res-wrong').textContent = wrongWordsList.length;
+            document.getElementById('result-score').textContent = (Math.round((correctCount / examQueue.length) * 100) || 0) + '%';
+            const container = document.getElementById('wrong-container'); container.innerHTML = '';
+            if(wrongWordsList.length === 0) container.innerHTML = '<div style="color:green">Perfect Score! 🎉</div>';
+            else wrongWordsList.forEach(w => { const div = document.createElement('div'); div.className = 'wrong-item'; div.textContent = w.word; container.appendChild(div); });
+        }
+        function closeExam() {
+            document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'none';
+            document.getElementById('result-view').style.display = 'none'; document.getElementById('main-view').style.display = 'block';
+        }
     </script>
 </body>
 </html>
