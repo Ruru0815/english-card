@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Dictionary & Exam</title>
+    <style>
+        :root {
+            --primary: #1d4ed8;
+            --secondary: #f1f5f9;
+            --text-main: #111827;
+            --text-light: #6b7280;
+            --font-serif: 'Merriweather', 'Georgia', serif;
+            --font-sans: 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-main);
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- 導覽列 --- */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: var(--font-serif);
+            font-weight: 900;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .nav-btn {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid #e5e7eb;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: var(--secondary); border-color: #d1d5db; }
+
+        .badge { background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+
+        /* --- 側邊欄 --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 300px;
+            height: 100vh;
+            background: #f9fafb;
+            border-left: 1px solid #e5e7eb;
+            transition: right 0.3s ease;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { right: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .word-list { flex: 1; overflow-y: auto; }
+        .list-item { background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+        
+        /* --- 主畫面 --- */
+        .container { margin-top: 80px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; }
+        .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; font-family: var(--font-serif); }
+        .entry-container { display: none; margin-top: 30px; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .entry-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; color: var(--text-main); margin: 0; }
+        
+        .phonetic-group { display: flex; align-items: center; gap: 10px; background: #f3f4f6; padding: 5px 15px; border-radius: 20px; }
+        .phonetic { font-family: 'Lucida Sans Unicode', sans-serif; color: var(--text-light); font-size: 18px; }
+
+        .action-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .action-btn:hover { background: var(--primary); color: white; }
+
+        /* 字典內容 */
+        .pos-section { margin-bottom: 30px; }
+        .pos-label { font-style: italic; font-weight: bold; color: var(--primary); font-size: 18px; display: block; margin-bottom: 10px; }
+        .definition { font-weight: 600; font-size: 18px; margin-bottom: 5px; }
+        .definition::before { content: "• "; color: var(--primary); }
+        
+        /* 考試模式 */
+        .exam-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .exam-word { font-family: var(--font-serif); font-size: 56px; font-weight: bold; filter: blur(15px); transition: filter 0.3s; margin: 30px 0; }
+        .exam-word.revealed { filter: blur(0); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Dictionary</div>
+        <button class="nav-btn" onclick="toggleSidebar()">
+            Saved <span class="badge" id="badge-count">0</span>
+        </button>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Vocabulary</h3>
+            <button onclick="toggleSidebar()" style="border:none; background:none; font-size:20px; cursor:pointer;">×</button>
+        </div>
+        <button onclick="startExam()" style="width:100%; padding:10px; margin-bottom:10px; background:var(--text-main); color:white; border:none; cursor:pointer; border-radius:4px;">Start Test</button>
+        <div class="word-list" id="saved-list"></div>
+        <button onclick="clearAll()" style="width:100%; margin-top:10px; border:1px solid red; background:none; color:red; padding:5px; cursor:pointer; border-radius:4px;">Clear All</button>
+    </div>
+
+    <div class="container" id="main-view">
+        <input type="text" class="search-input" id="word-input" placeholder="Type word..." onkeydown="if(event.key === 'Enter') searchWord()">
+
+        <div class="entry-container" id="entry-result">
+            <div class="entry-header">
+                <h1 class="headword" id="disp-word">Word</h1>
+                
+                <div class="phonetic-group">
+                    <span class="phonetic" id="disp-phonetic">/ ... /</span>
+                    <button class="action-btn" id="btn-audio">🔊</button>
+                </div>
+            </div>
+            
+            <audio id="audio-player"></audio>
+            <div id="meanings-area"></div>
+        </div>
+    </div>
+
+    <div class="exam-overlay" id="exam-view">
+        <button onclick="playExamAudio()" style="width:100px; height:100px; border-radius:50%; font-size:40px; border:none; background:var(--primary); color:white; cursor:pointer; margin-bottom:30px;">🔊</button>
+        <h1 class="exam-word" id="exam-answer">Word</h1>
+        <div style="display:flex; gap:20px;">
+            <button onclick="exitExam()" style="padding:10px 30px; cursor:pointer;">Exit</button>
+            <button onclick="revealAnswer()" id="btn-reveal" style="padding:10px 30px; background:black; color:white; cursor:pointer;">Show Word</button>
+            <button onclick="nextQuestion()" id="btn-next" style="display:none; padding:10px 30px; background:green; color:white; cursor:pointer;">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 資料 ---
+        let myWords = JSON.parse(localStorage.getItem('dictWords')) || [];
+        let examQueue = [];
+        let examIndex = 0;
+
+        // --- 初始化 ---
+        updateBadge();
+        renderList();
+
+        // --- 查詢 ---
+        async function searchWord() {
+            const input = document.getElementById('word-input');
+            const word = input.value.trim();
+            if(!word) return;
+            try {
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if(!res.ok) throw new Error("Not found");
+                const data = await res.json();
+                const entry = data[0];
+                document.getElementById('disp-word').textContent = entry.word;
+                
+                let audio = null, text = entry.phonetic || "";
+                const us = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3')) || entry.phonetics.find(p => p.audio);
+                if(us) { audio = us.audio; if(us.text) text = us.text; }
+                
+                document.getElementById('disp-phonetic').textContent = text ? `[ ${text} ]` : "";
+                const btn = document.getElementById('btn-audio');
+                const player = document.getElementById('audio-player');
+                if(audio) { btn.style.display='flex'; player.src=audio; btn.onclick=()=>player.play(); player.play().catch(()=>{}); }
+                else btn.style.display='none';
+
+                const area = document.getElementById('meanings-area'); area.innerHTML = '';
+                entry.meanings.forEach(m => {
+                    const s = document.createElement('div'); s.className='pos-section';
+                    s.innerHTML = `<span class="pos-label">${m.partOfSpeech}</span>`;
+                    m.definitions.forEach(d => {
+                        const div = document.createElement('div'); div.className='definition'; div.textContent = d.definition; s.appendChild(div);
+                    });
+                    area.appendChild(s);
+                });
+                document.getElementById('entry-result').style.display='block'; input.value='';
+                
+                // Save
+                const obj = { id:Date.now(), word:entry.word, audio:audio };
+                myWords = myWords.filter(w => w.word.toLowerCase()!==obj.word.toLowerCase());
+                myWords.unshift(obj); localStorage.setItem('dictWords', JSON.stringify(myWords));
+                renderList(); updateBadge();
+            } catch(e) { alert("Word not found"); }
+        }
+
+        // --- UI 操作 ---
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function renderList() {
+            const list = document.getElementById('saved-list'); list.innerHTML = '';
+            myWords.forEach(w => {
+                const d = document.createElement('div'); d.className='list-item';
+                d.innerHTML = `<span onclick="loadWord('${w.word}')">${w.word}</span> <span onclick="delWord(${w.id})" style="color:red;">×</span>`;
+                list.appendChild(d);
+            });
+        }
+        function loadWord(w) { document.getElementById('word-input').value=w; searchWord(); toggleSidebar(); }
+        function delWord(id) { myWords=myWords.filter(w=>w.id!==id); localStorage.setItem('dictWords',JSON.stringify(myWords)); renderList(); updateBadge(); }
+        function clearAll() { if(confirm("Clear all?")){ myWords=[]; localStorage.setItem('dictWords',JSON.stringify(myWords)); renderList(); updateBadge(); } }
+        function updateBadge() { document.getElementById('badge-count').textContent=myWords.length; }
+
+        // --- 考試 ---
+        function startExam() { if(myWords.length===0)return alert("No words"); toggleSidebar(); document.getElementById('main-view').style.display='none'; document.getElementById('exam-view').style.display='flex'; examQueue=[...myWords].sort(()=>Math.random()-0.5); examIndex=0; loadQ(); }
+        function loadQ() { if(examIndex>=examQueue.length){alert("Done"); return exitExam();} const w=examQueue[examIndex]; document.getElementById('exam-answer').textContent=w.word; document.getElementById('exam-answer').classList.remove('revealed'); document.getElementById('btn-reveal').style.display='inline-block'; document.getElementById('btn-next').style.display='none'; setTimeout(()=>playExamAudio(),500); }
+        function playExamAudio() { const w=examQueue[examIndex]; if(w.audio) new Audio(w.audio).play(); else alert("No audio"); }
+        function revealAnswer() { document.getElementById('exam-answer').classList.add('revealed'); document.getElementById('btn-reveal').style.display='none'; document.getElementById('btn-next').style.display='inline-block'; }
+        function nextQuestion() { examIndex++; loadQ(); }
+        function exitExam() { document.getElementById('main-view').style.display='block'; document.getElementById('exam-view').style.display='none'; }
+    </script>
+</body>
+</html>
