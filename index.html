@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Dictionary & Exam Suite</title>
+    <title>Pro Dictionary & Project Manager</title>
     <style>
         :root {
             --primary: #1d4ed8;
@@ -11,6 +11,10 @@
             --text-main: #111827;
             --success: #22c55e;
             --error: #ef4444;
+            --save-btn-bg: #e2e8f0;
+            --save-btn-color: #64748b;
+            --saved-bg: #dcfce7;
+            --saved-color: #15803d;
             --font-serif: 'Merriweather', serif;
             --font-sans: 'Segoe UI', Roboto, sans-serif;
         }
@@ -36,51 +40,89 @@
         }
         .logo { font-family: var(--font-serif); font-weight: 900; font-size: 24px; color: var(--primary); }
         
-        /* 右上角按鈕群組 */
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* 按鈕之間的距離 */
-        }
-
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
         .nav-btn {
             background: white; border: 1px solid #e5e7eb; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
             display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 14px;
-            text-decoration: none; /* 為了讓 a 標籤像按鈕 */
-            color: var(--text-main);
+            text-decoration: none; color: var(--text-main);
         }
         .nav-btn:hover { background: var(--secondary); }
-
-        /* 黃色期末考按鈕樣式 */
-        .btn-final {
-            background-color: #eab308; 
-            color: black;
-            border: 1px solid #ca8a04;
-        }
+        .btn-final { background-color: #eab308; color: black; border: 1px solid #ca8a04; }
         .btn-final:hover { background-color: #ca8a04; }
-
         .badge { background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; }
 
         /* Sidebar */
         .sidebar {
-            position: fixed; top: 0; right: -350px; width: 300px; height: 100vh; background: #f9fafb;
+            position: fixed; top: 0; right: -350px; width: 320px; height: 100vh; background: #f9fafb;
             border-left: 1px solid #e5e7eb; transition: right 0.3s ease; z-index: 200;
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
             box-shadow: -5px 0 15px rgba(0,0,0,0.05);
         }
         .sidebar.open { right: 0; }
-        .list-item { background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
         
+        /* Project Controls in Sidebar */
+        .project-controls {
+            background: white; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; margin-bottom: 15px;
+        }
+        .project-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .project-row { display: flex; gap: 5px; }
+        .project-select {
+            flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px; outline: none; font-size: 14px;
+        }
+        .btn-add-project {
+            padding: 5px 10px; background: var(--secondary); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        .btn-add-project:hover { background: #e2e8f0; }
+
         .sidebar-btn {
             width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; font-size: 14px;
         }
         .btn-test { background: var(--text-main); color: white; }
 
+        .list-item { background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+
         /* Main View */
         .container { margin-top: 80px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; }
         .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; }
         .entry-container { display: none; margin-top: 30px; }
+        
+        /* 字典標頭與儲存按鈕 */
+        .entry-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .word-group { display: flex; align-items: center; gap: 15px; }
         .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; margin: 0; }
+        
+        /* Save Button with Animation */
+        .btn-save-word {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 20px; border: none;
+            background: var(--save-btn-bg); color: var(--save-btn-color);
+            font-weight: bold; font-size: 16px; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 彈跳效果 */
+        }
+        .btn-save-word:hover { transform: scale(1.05); }
+        
+        /* 已儲存狀態 */
+        .btn-save-word.saved {
+            background: var(--saved-bg); color: var(--saved-color);
+        }
+        
+        /* 點擊動畫 */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: pop 0.3s ease; }
+
+        /* Cambridge Button */
+        .cambridge-btn {
+            background-color: #1d2a57; color: white; border: none; padding: 8px 15px;
+            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px;
+            display: flex; align-items: center; gap: 5px; transition: 0.2s;
+            text-decoration: none;
+        }
+        .cambridge-btn:hover { background-color: #2e4085; transform: translateY(-2px); }
+
         .phonetic-group { display: flex; align-items: center; gap: 10px; background: #f3f4f6; padding: 5px 15px; border-radius: 20px; margin-top: 10px; width: fit-content; }
         .definition { font-weight: 600; font-size: 18px; margin-bottom: 5px; margin-top: 10px; }
         .definition::before { content: "• "; color: var(--primary); }
@@ -133,10 +175,7 @@
         <div class="logo">Dictionary</div>
         
         <div class="nav-actions">
-            <a href="final_exam.html" class="nav-btn btn-final">
-                Final Exam ✈️
-            </a>
-
+            <a href="final_exam.html" class="nav-btn btn-final">Final Exam ✈️</a>
             <button class="nav-btn" onclick="toggleSidebar()">
                 Saved <span class="badge" id="badge-count">0</span>
             </button>
@@ -144,23 +183,44 @@
     </nav>
 
     <div class="sidebar" id="sidebar">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #eee;">
-            <h3>Word List</h3>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <h3 style="margin:0;">Vocabulary</h3>
             <button onclick="toggleSidebar()" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
         </div>
         
-        <button class="sidebar-btn btn-test" onclick="showExamSetup()">
-            Start Vocabulary Test 🎓
-        </button>
+        <div class="project-controls">
+            <div class="project-label">📁 Current Project (Folder)</div>
+            <div class="project-row">
+                <select id="project-select" class="project-select" onchange="switchProject()">
+                    </select>
+                <button class="btn-add-project" onclick="addNewProject()" title="Add New Project">＋</button>
+            </div>
+        </div>
 
-        <div id="saved-list" style="flex:1; overflow-y:auto; margin-top:10px; border-top:1px solid #eee;"></div>
-        <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%;">Clear All</button>
+        <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Test 🎓</button>
+
+        <div id="saved-list" style="flex:1; overflow-y:auto;"></div>
+        
+        <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%; border-radius:4px;">Clear Current List</button>
     </div>
 
     <div class="container" id="main-view">
         <input type="text" class="search-input" id="word-input" placeholder="Type a word..." onkeydown="if(event.key==='Enter') searchWord()">
+        
         <div class="entry-container" id="entry-result">
-            <h1 class="headword" id="disp-word">Word</h1>
+            <div class="entry-header">
+                <div class="word-group">
+                    <h1 class="headword" id="disp-word">Word</h1>
+                    <button class="btn-save-word" id="btn-save" onclick="toggleSaveWord()">
+                        <span id="save-icon">❤️</span> <span id="save-text">Save</span>
+                    </button>
+                </div>
+                
+                <a href="#" target="_blank" id="cambridge-link" class="cambridge-btn">
+                    🇨 Cambridge
+                </a>
+            </div>
+
             <div class="phonetic-group">
                 <span id="disp-phonetic">/ ... /</span>
                 <button onclick="playAudio()" style="background:none; border:none; cursor:pointer; font-size:20px;">🔊</button>
@@ -213,69 +273,236 @@
     </div>
 
     <script>
-        let myWords = JSON.parse(localStorage.getItem('dictWords')) || [];
-        let currentAudio = null;
+        // --- State Management ---
+        let allWords = JSON.parse(localStorage.getItem('dictWords')) || [];
+        // Projects: List of strings. Default has 'General'
+        let projectList = JSON.parse(localStorage.getItem('dictProjects')) || ['General'];
+        let currentProject = localStorage.getItem('lastProject') || 'General';
+
+        // Current Word Data (for saving)
+        let currentWordData = null;
+
+        // Exam State
         let examQueue = [];
         let examIndex = 0;
         let examMode = '';
         let correctCount = 0;
         let wrongWordsList = [];
 
-        updateBadge();
+        // Init
+        initProjects();
         renderList();
+        
+        // --- Project Logic ---
+        function initProjects() {
+            const select = document.getElementById('project-select');
+            select.innerHTML = '';
+            projectList.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p;
+                if(p === currentProject) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function addNewProject() {
+            const name = prompt("Enter new project name:");
+            if(name && !projectList.includes(name)) {
+                projectList.push(name);
+                localStorage.setItem('dictProjects', JSON.stringify(projectList));
+                currentProject = name;
+                localStorage.setItem('lastProject', name);
+                initProjects();
+                renderList(); // clear list view for new project
+                updateSaveButtonState();
+            }
+        }
+
+        function switchProject() {
+            const select = document.getElementById('project-select');
+            currentProject = select.value;
+            localStorage.setItem('lastProject', currentProject);
+            renderList();
+            updateSaveButtonState();
+        }
+
+        // --- Dictionary Search ---
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryWord = urlParams.get('q');
+            if (queryWord) {
+                document.getElementById('word-input').value = queryWord;
+                searchWord();
+            }
+        };
 
         async function searchWord() {
             const input = document.getElementById('word-input');
             const word = input.value.trim();
             if(!word) return;
+            
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 if(!res.ok) throw new Error();
                 const data = await res.json();
                 const entry = data[0];
+                
+                // Display Data
                 document.getElementById('disp-word').textContent = entry.word;
+                document.getElementById('cambridge-link').href = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${entry.word}`;
+                
                 let audioSrc = null;
                 const usAudio = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3')) || entry.phonetics.find(p => p.audio);
                 if(usAudio) audioSrc = usAudio.audio;
-                currentAudio = audioSrc;
+                
+                // Set Global Current Word Data
+                currentWordData = {
+                    word: entry.word,
+                    audio: audioSrc,
+                    phonetic: entry.phonetic || ""
+                };
+
                 document.getElementById('disp-phonetic').textContent = entry.phonetic || "";
-                document.getElementById('meanings-area').innerHTML = entry.meanings.map(m => `<div><span style="font-style:italic;color:#666;">${m.partOfSpeech}</span><div class="definition">${m.definitions[0].definition}</div></div>`).join('');
+                document.getElementById('meanings-area').innerHTML = entry.meanings.map(m => 
+                    `<div><span style="font-style:italic;color:#666;">${m.partOfSpeech}</span><div class="definition">${m.definitions[0].definition}</div></div>`
+                ).join('');
+
                 document.getElementById('entry-result').style.display = 'block';
                 input.value = '';
-                const newWord = { id: Date.now(), word: entry.word, audio: audioSrc };
-                myWords = myWords.filter(w => w.word.toLowerCase() !== newWord.word.toLowerCase());
-                myWords.unshift(newWord);
-                localStorage.setItem('dictWords', JSON.stringify(myWords));
-                renderList(); updateBadge();
+
+                // Update Button State (Is it saved in current project?)
+                updateSaveButtonState();
+
             } catch(e) { alert("Word not found"); }
         }
 
-        function playAudio() { if(currentAudio) new Audio(currentAudio).play(); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        // --- Save / Unsave Logic ---
+        function toggleSaveWord() {
+            if (!currentWordData) return;
+
+            // Check if exists in CURRENT project
+            const existsIndex = allWords.findIndex(w => 
+                w.word.toLowerCase() === currentWordData.word.toLowerCase() && 
+                (w.project || 'General') === currentProject
+            );
+
+            const btn = document.getElementById('btn-save');
+
+            if (existsIndex >= 0) {
+                // Already saved -> Remove it? Or just alert?
+                // Let's implement toggle (Remove)
+                if(confirm(`Remove '${currentWordData.word}' from ${currentProject}?`)) {
+                    allWords.splice(existsIndex, 1);
+                    localStorage.setItem('dictWords', JSON.stringify(allWords));
+                    renderList();
+                    updateSaveButtonState();
+                }
+            } else {
+                // Not saved -> Add it
+                const newWord = {
+                    id: Date.now(),
+                    word: currentWordData.word,
+                    audio: currentWordData.audio,
+                    project: currentProject // Attach project tag
+                };
+                allWords.unshift(newWord); // Add to top
+                localStorage.setItem('dictWords', JSON.stringify(allWords));
+                
+                // Animation
+                btn.classList.add('animate-pop');
+                setTimeout(() => btn.classList.remove('animate-pop'), 300);
+                
+                renderList();
+                updateSaveButtonState();
+            }
+        }
+
+        function updateSaveButtonState() {
+            if (!currentWordData) return;
+            const btn = document.getElementById('btn-save');
+            const icon = document.getElementById('save-icon');
+            const text = document.getElementById('save-text');
+
+            // Check existence in CURRENT project
+            const exists = allWords.some(w => 
+                w.word.toLowerCase() === currentWordData.word.toLowerCase() && 
+                (w.project || 'General') === currentProject
+            );
+
+            if (exists) {
+                btn.classList.add('saved');
+                icon.textContent = '✅';
+                text.textContent = 'Saved!';
+            } else {
+                btn.classList.remove('saved');
+                icon.textContent = '❤️';
+                text.textContent = 'Save';
+            }
+        }
+
+        // --- Sidebar Logic ---
         function renderList() {
-            const el = document.getElementById('saved-list'); el.innerHTML='';
-            myWords.forEach(w => {
+            const el = document.getElementById('saved-list');
+            el.innerHTML = '';
+            
+            // Filter words by Current Project
+            const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
+            
+            document.getElementById('badge-count').textContent = projectWords.length;
+
+            projectWords.forEach(w => {
                 const div = document.createElement('div'); div.className='list-item';
                 div.innerHTML=`<span onclick="loadFromList('${w.word}')">${w.word}</span> <span onclick="delWord(${w.id})" style="color:red">×</span>`;
                 el.appendChild(div);
             });
         }
+        
         function loadFromList(w) { document.getElementById('word-input').value=w; searchWord(); toggleSidebar(); }
-        function delWord(id) { myWords=myWords.filter(w=>w.id!==id); localStorage.setItem('dictWords',JSON.stringify(myWords)); renderList(); updateBadge(); }
-        function clearAll() { if(confirm("Clear?")){myWords=[];localStorage.setItem('dictWords','[]');renderList();updateBadge();} }
-        function updateBadge() { document.getElementById('badge-count').textContent = myWords.length; }
+        
+        function delWord(id) {
+            allWords = allWords.filter(w => w.id !== id);
+            localStorage.setItem('dictWords', JSON.stringify(allWords));
+            renderList();
+            updateSaveButtonState();
+        }
 
+        function clearAll() {
+            if(confirm(`Delete ALL words in '${currentProject}'?`)) {
+                // Keep words NOT in current project
+                allWords = allWords.filter(w => (w.project || 'General') !== currentProject);
+                localStorage.setItem('dictWords', JSON.stringify(allWords));
+                renderList();
+                updateSaveButtonState();
+            }
+        }
+
+        // --- Other Utils ---
+        function playAudio() { if(currentWordData && currentWordData.audio) new Audio(currentWordData.audio).play(); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        // --- Exam Logic (Filters by Project) ---
         function showExamSetup() {
-            if(myWords.length === 0) return alert("Please search and save words first!");
+            // Only test words in current project
+            const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
+            
+            if(projectWords.length === 0) return alert(`No words in '${currentProject}' to test!`);
             toggleSidebar(); document.getElementById('main-view').style.display = 'none'; document.getElementById('exam-setup').style.display = 'flex';
         }
+
         function startExam(mode) {
-            examMode = mode; examQueue = [...myWords].sort(() => Math.random() - 0.5); examIndex = 0; correctCount = 0; wrongWordsList = [];
+            examMode = mode;
+            // Filter queue by project
+            const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
+            examQueue = [...projectWords].sort(() => Math.random() - 0.5);
+            
+            examIndex = 0; correctCount = 0; wrongWordsList = [];
             document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'flex';
             document.getElementById('mode-listen-area').style.display = (mode === 'listening') ? 'block' : 'none';
             document.getElementById('mode-type-area').style.display = (mode === 'typing') ? 'block' : 'none';
             loadQuestion();
         }
+        
         function loadQuestion() {
             if(examIndex >= examQueue.length) { showResults(); return; }
             const currentItem = examQueue[examIndex];
