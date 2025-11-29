@@ -60,7 +60,7 @@
         }
         .sidebar.open { right: 0; }
         
-        /* Project Controls in Sidebar */
+        /* Project Controls */
         .project-controls {
             background: white; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; margin-bottom: 15px;
         }
@@ -86,35 +86,22 @@
         .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; }
         .entry-container { display: none; margin-top: 30px; }
         
-        /* 字典標頭與儲存按鈕 */
         .entry-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .word-group { display: flex; align-items: center; gap: 15px; }
         .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; margin: 0; }
         
-        /* Save Button with Animation */
         .btn-save-word {
             display: flex; align-items: center; gap: 6px;
             padding: 8px 16px; border-radius: 20px; border: none;
             background: var(--save-btn-bg); color: var(--save-btn-color);
             font-weight: bold; font-size: 16px; cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 彈跳效果 */
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .btn-save-word:hover { transform: scale(1.05); }
-        
-        /* 已儲存狀態 */
-        .btn-save-word.saved {
-            background: var(--saved-bg); color: var(--saved-color);
-        }
-        
-        /* 點擊動畫 */
-        @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
+        .btn-save-word.saved { background: var(--saved-bg); color: var(--saved-color); }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .animate-pop { animation: pop 0.3s ease; }
 
-        /* Cambridge Button */
         .cambridge-btn {
             background-color: #1d2a57; color: white; border: none; padding: 8px 15px;
             border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px;
@@ -173,7 +160,6 @@
 
     <nav class="navbar">
         <div class="logo">Dictionary</div>
-        
         <div class="nav-actions">
             <a href="final_exam.html" class="nav-btn btn-final">Final Exam ✈️</a>
             <button class="nav-btn" onclick="toggleSidebar()">
@@ -191,8 +177,7 @@
         <div class="project-controls">
             <div class="project-label">📁 Current Project (Folder)</div>
             <div class="project-row">
-                <select id="project-select" class="project-select" onchange="switchProject()">
-                    </select>
+                <select id="project-select" class="project-select" onchange="switchProject()"></select>
                 <button class="btn-add-project" onclick="addNewProject()" title="Add New Project">＋</button>
             </div>
         </div>
@@ -200,7 +185,6 @@
         <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Test 🎓</button>
 
         <div id="saved-list" style="flex:1; overflow-y:auto;"></div>
-        
         <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%; border-radius:4px;">Clear Current List</button>
     </div>
 
@@ -215,10 +199,7 @@
                         <span id="save-icon">❤️</span> <span id="save-text">Save</span>
                     </button>
                 </div>
-                
-                <a href="#" target="_blank" id="cambridge-link" class="cambridge-btn">
-                    🇨 Cambridge
-                </a>
+                <a href="#" target="_blank" id="cambridge-link" class="cambridge-btn">🇨 Cambridge</a>
             </div>
 
             <div class="phonetic-group">
@@ -273,14 +254,11 @@
     </div>
 
     <script>
-        // --- State Management ---
+        // State
         let allWords = JSON.parse(localStorage.getItem('dictWords')) || [];
-        // Projects: List of strings. Default has 'General'
         let projectList = JSON.parse(localStorage.getItem('dictProjects')) || ['General'];
         let currentProject = localStorage.getItem('lastProject') || 'General';
-
-        // Current Word Data (for saving)
-        let currentWordData = null;
+        let currentWordData = null; // Store current word info including audio status
 
         // Exam State
         let examQueue = [];
@@ -292,49 +270,38 @@
         // Init
         initProjects();
         renderList();
-        
+
         // --- Project Logic ---
         function initProjects() {
             const select = document.getElementById('project-select');
             select.innerHTML = '';
             projectList.forEach(p => {
                 const opt = document.createElement('option');
-                opt.value = p;
-                opt.textContent = p;
+                opt.value = p; opt.textContent = p;
                 if(p === currentProject) opt.selected = true;
                 select.appendChild(opt);
             });
         }
-
         function addNewProject() {
             const name = prompt("Enter new project name:");
             if(name && !projectList.includes(name)) {
                 projectList.push(name);
                 localStorage.setItem('dictProjects', JSON.stringify(projectList));
-                currentProject = name;
-                localStorage.setItem('lastProject', name);
-                initProjects();
-                renderList(); // clear list view for new project
-                updateSaveButtonState();
+                currentProject = name; localStorage.setItem('lastProject', name);
+                initProjects(); renderList(); updateSaveButtonState();
             }
         }
-
         function switchProject() {
-            const select = document.getElementById('project-select');
-            currentProject = select.value;
+            currentProject = document.getElementById('project-select').value;
             localStorage.setItem('lastProject', currentProject);
-            renderList();
-            updateSaveButtonState();
+            renderList(); updateSaveButtonState();
         }
 
-        // --- Dictionary Search ---
+        // --- Search Logic with Enhanced Audio Finding ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const queryWord = urlParams.get('q');
-            if (queryWord) {
-                document.getElementById('word-input').value = queryWord;
-                searchWord();
-            }
+            if (queryWord) { document.getElementById('word-input').value = queryWord; searchWord(); }
         };
 
         async function searchWord() {
@@ -346,75 +313,64 @@
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 if(!res.ok) throw new Error();
                 const data = await res.json();
-                const entry = data[0];
                 
-                // Display Data
+                // Advanced Audio Finder: Loop through ALL entries, not just the first one
+                let audioSrc = null;
+                // 1. Try to find US audio first
+                for(const entry of data) {
+                    const us = entry.phonetics.find(p => p.audio && p.audio !== '' && p.audio.includes('-us.mp3'));
+                    if(us) { audioSrc = us.audio; break; }
+                }
+                // 2. If no US, try find ANY audio
+                if(!audioSrc) {
+                    for(const entry of data) {
+                        const any = entry.phonetics.find(p => p.audio && p.audio !== '');
+                        if(any) { audioSrc = any.audio; break; }
+                    }
+                }
+
+                // Use the first entry for text display
+                const entry = data[0]; 
+                
                 document.getElementById('disp-word').textContent = entry.word;
                 document.getElementById('cambridge-link').href = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${entry.word}`;
+                document.getElementById('disp-phonetic').textContent = entry.phonetic || (entry.phonetics.find(p=>p.text)?.text) || "";
                 
-                let audioSrc = null;
-                const usAudio = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3')) || entry.phonetics.find(p => p.audio);
-                if(usAudio) audioSrc = usAudio.audio;
-                
-                // Set Global Current Word Data
-                currentWordData = {
-                    word: entry.word,
-                    audio: audioSrc,
+                currentWordData = { 
+                    word: entry.word, 
+                    audio: audioSrc, // Might be null
                     phonetic: entry.phonetic || ""
                 };
 
-                document.getElementById('disp-phonetic').textContent = entry.phonetic || "";
                 document.getElementById('meanings-area').innerHTML = entry.meanings.map(m => 
                     `<div><span style="font-style:italic;color:#666;">${m.partOfSpeech}</span><div class="definition">${m.definitions[0].definition}</div></div>`
                 ).join('');
 
                 document.getElementById('entry-result').style.display = 'block';
                 input.value = '';
-
-                // Update Button State (Is it saved in current project?)
                 updateSaveButtonState();
 
             } catch(e) { alert("Word not found"); }
         }
 
-        // --- Save / Unsave Logic ---
+        // --- Save Logic ---
         function toggleSaveWord() {
             if (!currentWordData) return;
-
-            // Check if exists in CURRENT project
-            const existsIndex = allWords.findIndex(w => 
-                w.word.toLowerCase() === currentWordData.word.toLowerCase() && 
-                (w.project || 'General') === currentProject
-            );
-
+            const existsIndex = allWords.findIndex(w => w.word.toLowerCase() === currentWordData.word.toLowerCase() && (w.project || 'General') === currentProject);
             const btn = document.getElementById('btn-save');
 
             if (existsIndex >= 0) {
-                // Already saved -> Remove it? Or just alert?
-                // Let's implement toggle (Remove)
                 if(confirm(`Remove '${currentWordData.word}' from ${currentProject}?`)) {
                     allWords.splice(existsIndex, 1);
                     localStorage.setItem('dictWords', JSON.stringify(allWords));
-                    renderList();
-                    updateSaveButtonState();
+                    renderList(); updateSaveButtonState();
                 }
             } else {
-                // Not saved -> Add it
-                const newWord = {
-                    id: Date.now(),
-                    word: currentWordData.word,
-                    audio: currentWordData.audio,
-                    project: currentProject // Attach project tag
-                };
-                allWords.unshift(newWord); // Add to top
+                const newWord = { id: Date.now(), word: currentWordData.word, audio: currentWordData.audio, project: currentProject };
+                allWords.unshift(newWord);
                 localStorage.setItem('dictWords', JSON.stringify(allWords));
-                
-                // Animation
-                btn.classList.add('animate-pop');
-                setTimeout(() => btn.classList.remove('animate-pop'), 300);
-                
-                renderList();
-                updateSaveButtonState();
+                btn.classList.add('animate-pop'); setTimeout(() => btn.classList.remove('animate-pop'), 300);
+                renderList(); updateSaveButtonState();
             }
         }
 
@@ -423,86 +379,57 @@
             const btn = document.getElementById('btn-save');
             const icon = document.getElementById('save-icon');
             const text = document.getElementById('save-text');
+            const exists = allWords.some(w => w.word.toLowerCase() === currentWordData.word.toLowerCase() && (w.project || 'General') === currentProject);
 
-            // Check existence in CURRENT project
-            const exists = allWords.some(w => 
-                w.word.toLowerCase() === currentWordData.word.toLowerCase() && 
-                (w.project || 'General') === currentProject
-            );
-
-            if (exists) {
-                btn.classList.add('saved');
-                icon.textContent = '✅';
-                text.textContent = 'Saved!';
-            } else {
-                btn.classList.remove('saved');
-                icon.textContent = '❤️';
-                text.textContent = 'Save';
-            }
+            if (exists) { btn.classList.add('saved'); icon.textContent = '✅'; text.textContent = 'Saved!'; } 
+            else { btn.classList.remove('saved'); icon.textContent = '❤️'; text.textContent = 'Save'; }
         }
 
-        // --- Sidebar Logic ---
+        // --- Sidebar ---
         function renderList() {
-            const el = document.getElementById('saved-list');
-            el.innerHTML = '';
-            
-            // Filter words by Current Project
+            const el = document.getElementById('saved-list'); el.innerHTML = '';
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
-            
             document.getElementById('badge-count').textContent = projectWords.length;
-
             projectWords.forEach(w => {
                 const div = document.createElement('div'); div.className='list-item';
                 div.innerHTML=`<span onclick="loadFromList('${w.word}')">${w.word}</span> <span onclick="delWord(${w.id})" style="color:red">×</span>`;
                 el.appendChild(div);
             });
         }
-        
         function loadFromList(w) { document.getElementById('word-input').value=w; searchWord(); toggleSidebar(); }
-        
-        function delWord(id) {
-            allWords = allWords.filter(w => w.id !== id);
-            localStorage.setItem('dictWords', JSON.stringify(allWords));
-            renderList();
-            updateSaveButtonState();
-        }
+        function delWord(id) { allWords = allWords.filter(w => w.id !== id); localStorage.setItem('dictWords', JSON.stringify(allWords)); renderList(); updateSaveButtonState(); }
+        function clearAll() { if(confirm(`Delete ALL words in '${currentProject}'?`)) { allWords = allWords.filter(w => (w.project || 'General') !== currentProject); localStorage.setItem('dictWords', JSON.stringify(allWords)); renderList(); updateSaveButtonState(); } }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
-        function clearAll() {
-            if(confirm(`Delete ALL words in '${currentProject}'?`)) {
-                // Keep words NOT in current project
-                allWords = allWords.filter(w => (w.project || 'General') !== currentProject);
-                localStorage.setItem('dictWords', JSON.stringify(allWords));
-                renderList();
-                updateSaveButtonState();
+        // --- Audio Logic (Dual Fallback) ---
+        function playAudio() {
+            // Priority 1: API Audio
+            if(currentWordData && currentWordData.audio) {
+                new Audio(currentWordData.audio).play();
+            } else if (currentWordData && currentWordData.word) {
+                // Priority 2: Browser TTS (Robot)
+                const u = new SpeechSynthesisUtterance(currentWordData.word);
+                u.lang = 'en-US';
+                window.speechSynthesis.speak(u);
             }
         }
 
-        // --- Other Utils ---
-        function playAudio() { if(currentWordData && currentWordData.audio) new Audio(currentWordData.audio).play(); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-        // --- Exam Logic (Filters by Project) ---
+        // --- Exam Logic ---
         function showExamSetup() {
-            // Only test words in current project
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
-            
             if(projectWords.length === 0) return alert(`No words in '${currentProject}' to test!`);
             toggleSidebar(); document.getElementById('main-view').style.display = 'none'; document.getElementById('exam-setup').style.display = 'flex';
         }
-
         function startExam(mode) {
             examMode = mode;
-            // Filter queue by project
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
             examQueue = [...projectWords].sort(() => Math.random() - 0.5);
-            
             examIndex = 0; correctCount = 0; wrongWordsList = [];
             document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'flex';
             document.getElementById('mode-listen-area').style.display = (mode === 'listening') ? 'block' : 'none';
             document.getElementById('mode-type-area').style.display = (mode === 'typing') ? 'block' : 'none';
             loadQuestion();
         }
-        
         function loadQuestion() {
             if(examIndex >= examQueue.length) { showResults(); return; }
             const currentItem = examQueue[examIndex];
@@ -515,7 +442,16 @@
             }
             setTimeout(playExamAudio, 500);
         }
-        function playExamAudio() { const item = examQueue[examIndex]; if(item.audio) new Audio(item.audio).play(); }
+        function playExamAudio() { 
+            const item = examQueue[examIndex]; 
+            if(item.audio) new Audio(item.audio).play(); 
+            else {
+                // Fallback for Exam too
+                const u = new SpeechSynthesisUtterance(item.word);
+                u.lang = 'en-US';
+                window.speechSynthesis.speak(u);
+            }
+        }
         function checkTyping() {
             const input = document.getElementById('type-input');
             if(input.value.trim().toLowerCase() === examQueue[examIndex].word.toLowerCase()) { triggerFeedback('success'); correctCount++; }
