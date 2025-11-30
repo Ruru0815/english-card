@@ -31,34 +31,10 @@
 
         /* Clock (Bottom Left) */
         .system-clock {
-            position: fixed;
-            bottom: 15px;
-            left: 20px;
-            font-family: monospace;
-            font-size: 16px;
-            color: #94a3b8;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            z-index: 900;
+            position: fixed; bottom: 15px; left: 20px; font-family: monospace; font-size: 16px;
+            color: #94a3b8; background: rgba(255, 255, 255, 0.9); padding: 5px 10px;
+            border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 900;
         }
-
-        /* Daily Word Card */
-        .daily-card {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #bae6fd;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        .daily-card h3 { margin: 0 0 10px 0; color: #0284c7; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .daily-word { font-size: 24px; font-weight: bold; color: #0c4a6e; margin-bottom: 5px; cursor: pointer; }
-        .daily-word:hover { text-decoration: underline; }
-        .daily-def { font-size: 16px; color: #334155; margin-bottom: 5px; }
-        .daily-ex { font-style: italic; color: #64748b; font-size: 14px; border-left: 3px solid #7dd3fc; padding-left: 10px; margin-top: 10px; }
 
         /* Navbar */
         .navbar {
@@ -67,12 +43,10 @@
             position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 100;
         }
         .logo { font-family: var(--font-serif); font-weight: 900; font-size: 24px; color: var(--primary); }
-        
         .nav-actions { display: flex; align-items: center; gap: 12px; }
         .nav-btn {
             background: white; border: 1px solid #e5e7eb; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 14px;
-            text-decoration: none; color: var(--text-main);
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 14px; text-decoration: none; color: var(--text-main);
         }
         .nav-btn:hover { background: var(--secondary); }
         .btn-final { background-color: #eab308; color: black; border: 1px solid #ca8a04; }
@@ -88,41 +62,50 @@
         }
         .sidebar.open { right: 0; }
         
-        /* Project Controls */
-        .project-controls {
-            background: white; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; margin-bottom: 15px;
-        }
+        .project-controls { background: white; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
         .project-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
         .project-row { display: flex; gap: 5px; }
-        .project-select {
-            flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px; outline: none; font-size: 14px;
-        }
-        .btn-add-project {
-            padding: 5px 10px; background: var(--secondary); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-weight: bold;
-        }
-        .btn-add-project:hover { background: #e2e8f0; }
-
-        .sidebar-btn {
-            width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; font-size: 14px;
-        }
+        .project-select { flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px; outline: none; font-size: 14px; }
+        .btn-add-project { padding: 5px 10px; background: var(--secondary); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        .sidebar-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; font-size: 14px; }
         .btn-test { background: var(--text-main); color: white; }
-
         .list-item { background: white; border: 1px solid #e5e7eb; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
 
         /* Main View */
         .container { margin-top: 80px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; }
-        .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; margin-bottom: 20px;}
-        .entry-container { display: none; margin-top: 30px; }
         
+        /* Search Input */
+        .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; margin-bottom: 30px; box-sizing: border-box; }
+        
+        /* Daily Word Card (Moved Below Input) */
+        .daily-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            display: none; /* Initially hidden */
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        .daily-card h3 { margin: 0 0 10px 0; color: #0284c7; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .daily-word { font-size: 24px; font-weight: bold; color: #0c4a6e; margin-bottom: 5px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .daily-word:hover { text-decoration: underline; }
+        .daily-def { font-size: 16px; color: #334155; margin-bottom: 5px; }
+        .daily-ex { font-style: italic; color: #64748b; font-size: 14px; border-left: 3px solid #7dd3fc; padding-left: 10px; margin-top: 10px; }
+
+        /* Entry Result */
+        .entry-container { display: none; margin-top: 10px; }
         .entry-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .word-group { display: flex; align-items: center; gap: 15px; }
         .headword { font-family: var(--font-serif); font-size: 48px; font-weight: 700; margin: 0; }
         
         .btn-save-word {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; border-radius: 20px; border: none;
-            background: var(--save-btn-bg); color: var(--save-btn-color);
-            font-weight: bold; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px; border: none;
+            background: var(--save-btn-bg); color: var(--save-btn-color); font-weight: bold; font-size: 16px; cursor: pointer;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .btn-save-word:hover { transform: scale(1.05); }
@@ -131,10 +114,8 @@
         .animate-pop { animation: pop 0.3s ease; }
 
         .cambridge-btn {
-            background-color: #1d2a57; color: white; border: none; padding: 8px 15px;
-            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px;
-            display: flex; align-items: center; gap: 5px; transition: 0.2s;
-            text-decoration: none;
+            background-color: #1d2a57; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer;
+            font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; transition: 0.2s; text-decoration: none;
         }
         .cambridge-btn:hover { background-color: #2e4085; transform: translateY(-2px); }
 
@@ -155,25 +136,18 @@
         }
         .mode-btn:hover { background: var(--primary); color: white; }
         .exam-box { text-align: center; width: 90%; max-width: 500px; }
+        
         .audio-big-btn {
-            width: 100px; height: 100px; border-radius: 50%; background: var(--primary); color: white;
-            font-size: 40px; border: none; cursor: pointer; margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(29, 78, 216, 0.3); transition: transform 0.1s;
+            width: 120px; height: 120px; border-radius: 50%; background: var(--primary); color: white;
+            font-size: 50px; border: none; cursor: pointer; margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(29, 78, 216, 0.4); transition: transform 0.1s;
         }
         .audio-big-btn:active { transform: scale(0.95); }
-        .black-box-mask {
-            background-color: black; color: black; padding: 10px 20px; border-radius: 8px; user-select: none;
-            display: inline-block; font-size: 40px; font-weight: bold; font-family: var(--font-serif); min-width: 200px;
-        }
-        .revealed { background-color: transparent; color: var(--text-main); }
+        
         .type-input {
             font-size: 32px; text-align: center; padding: 10px; border: none; border-bottom: 3px solid #ddd;
             outline: none; width: 100%; font-family: var(--font-serif); font-weight: bold; text-transform: lowercase;
         }
-        .judge-btns { display: none; gap: 20px; justify-content: center; margin-top: 30px; }
-        .btn-judge { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; color: white; }
-        .btn-yes { background: var(--success); }
-        .btn-no { background: var(--error); }
         .result-box { text-align: center; width: 90%; max-width: 600px; }
         .score-circle {
             width: 150px; height: 150px; border-radius: 50%; border: 10px solid var(--primary);
@@ -181,7 +155,6 @@
             font-size: 40px; font-weight: 900; color: var(--primary);
         }
         
-        /* 詳細成績單樣式 */
         .wrong-list { text-align: left; max-height: 300px; overflow-y: auto; background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .wrong-item { border-bottom: 1px solid #ddd; padding: 10px 0; display:flex; justify-content: space-between; align-items: center; }
         .user-ans { color: var(--error); text-decoration: line-through; margin-right: 10px; font-size: 14px;}
@@ -216,7 +189,7 @@
             </div>
         </div>
 
-        <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Test 🎓</button>
+        <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Spelling Test 🎓</button>
 
         <div id="saved-list" style="flex:1; overflow-y:auto;"></div>
         <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%; border-radius:4px;">Clear Current List</button>
@@ -224,14 +197,16 @@
 
     <div class="container" id="main-view">
         
-        <div class="daily-card" id="daily-card" style="display:none;">
-            <h3>🌟 Daily Random Review</h3>
-            <div class="daily-word" id="dw-word" onclick="searchDaily()">Loading...</div>
+        <input type="text" class="search-input" id="word-input" placeholder="Type a word..." onkeydown="if(event.key==='Enter') searchWord()">
+
+        <div class="daily-card" id="daily-card">
+            <h3>🌟 Random Daily Word (General)</h3>
+            <div class="daily-word" id="dw-word" onclick="searchDaily()">
+                <span>Loading...</span>
+            </div>
             <div class="daily-def" id="dw-def"></div>
             <div class="daily-ex" id="dw-ex"></div>
         </div>
-
-        <input type="text" class="search-input" id="word-input" placeholder="Type a word..." onkeydown="if(event.key==='Enter') searchWord()">
         
         <div class="entry-container" id="entry-result">
             <div class="entry-header">
@@ -254,32 +229,28 @@
 
     <div class="exam-overlay" id="exam-setup">
         <div class="mode-select-box">
-            <h1>Choose Exam Mode</h1>
-            <button class="mode-btn" onclick="startExam('listening')">👂 Listening Mode<br><span style="font-size:12px; color:#666;">Black box + Self check</span></button>
-            <button class="mode-btn" onclick="startExam('typing')">⌨️ Typing Test<br><span style="font-size:12px; color:#666;">Strict Mode (Result at end)</span></button>
+            <h1>Spelling Test</h1>
+            <p style="color:#666; margin-bottom:20px;">
+                Listen to the audio and type the word.<br>Results will be shown at the end.
+            </p>
+            <button class="mode-btn" onclick="startExam()">▶️ Start Test</button>
             <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
     <div class="exam-overlay" id="exam-active">
         <div class="exam-box">
+            <div style="color:#666; margin-bottom:10px;">Listen & Type</div>
             <button class="audio-big-btn" onclick="playExamAudio()">🔊</button>
             
-            <div id="mode-listen-area" style="display:none;">
-                <div id="listen-black-box" class="black-box-mask">WORD</div>
-                <div style="margin-top:40px;"><button id="btn-reveal" onclick="revealListening()" style="padding:10px 30px; font-size:16px; cursor:pointer;">Show Answer</button></div>
-                <div class="judge-btns" id="judge-btns">
-                    <button class="btn-judge btn-no" onclick="handleJudge(false)">❌ Forgot</button>
-                    <button class="btn-judge btn-yes" onclick="handleJudge(true)">✅ Correct</button>
-                </div>
-            </div>
-
-            <div id="mode-type-area" style="display:none;">
+            <div id="mode-type-area">
                 <input type="text" id="type-input" class="type-input" placeholder="Type answer..." autocomplete="off" onkeydown="if(event.key==='Enter') checkTypingStrict()">
-                <div style="margin-top:20px; color:#999; font-size:14px;">Press Enter to submit (No hints!)</div>
+                <div style="margin-top:20px; color:#999; font-size:14px;">Press Enter to submit</div>
             </div>
 
-            <div style="margin-top:30px; color:#ccc;"><span id="q-current">1</span> / <span id="q-total">10</span></div>
+            <div style="margin-top:40px; color:#ccc; font-weight:bold; font-size:18px;">
+                <span id="q-current">1</span> / <span id="q-total">10</span>
+            </div>
             <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Exit</button>
         </div>
     </div>
@@ -292,14 +263,14 @@
                 <div style="color:var(--success); font-weight:bold;">Correct: <span id="res-correct">0</span></div>
                 <div style="color:var(--error); font-weight:bold;">Wrong: <span id="res-wrong">0</span></div>
             </div>
-            <h3>Detailed Report</h3>
+            <h3>Report</h3>
             <div class="wrong-list" id="wrong-container"></div>
             <button onclick="closeExam()" style="padding:15px 40px; background:var(--primary); color:white; border:none; border-radius:30px; font-size:18px; cursor:pointer;">Close</button>
         </div>
     </div>
 
     <script>
-        // Data State
+        // --- Data & State ---
         let allWords = JSON.parse(localStorage.getItem('dictWords')) || [];
         let projectList = JSON.parse(localStorage.getItem('dictProjects')) || ['General'];
         let currentProject = localStorage.getItem('lastProject') || 'General';
@@ -308,10 +279,21 @@
         // Exam State
         let examQueue = [];
         let examIndex = 0;
-        let examMode = '';
         let correctCount = 0;
-        let wrongWordsList = []; // For Mode 1
-        let strictResults = []; // For Mode 2: { word, userAns, isCorrect }
+        let strictResults = []; 
+
+        // Daily Word List (100 High-Frequency Academic/TOEIC Words)
+        const dailyVocabulary = [
+            "ambitious", "benefit", "circumstance", "distinct", "elaborate", "fascinate", "genuine", "hostile", "inevitable", "justify",
+            "knowledge", "leisure", "maintain", "negotiate", "obstacle", "potential", "qualify", "relevant", "significant", "tolerate",
+            "urgent", "valid", "wealth", "yield", "zeal", "abundant", "brief", "capacity", "debate", "efficient",
+            "flexible", "generate", "hesitate", "identify", "jeopardy", "keen", "logic", "modify", "notion", "optimistic",
+            "precise", "quote", "recommend", "strategy", "tendency", "ultimate", "venture", "widespread", "adapt", "budget",
+            "candidate", "decade", "emphasize", "finance", "global", "habitat", "impact", "joint", "landscape", "marvel",
+            "native", "objective", "perceive", "rapid", "severe", "theory", "unique", "vital", "witness", "access",
+            "barrier", "career", "deposit", "element", "factor", "growth", "highlight", "income", "justice", "key",
+            "launch", "mention", "network", "option", "phase", "range", "sector", "target", "union", "volume"
+        ];
 
         // --- Init ---
         initProjects();
@@ -319,7 +301,6 @@
         updateTime();
         setInterval(updateTime, 1000);
         
-        // Load Daily Word on startup
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const queryWord = urlParams.get('q');
@@ -330,49 +311,43 @@
             loadDailyWord();
         };
 
-        // --- Clock Feature ---
+        // --- Clock ---
         function updateTime() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            const s = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('sys-clock').textContent = `${year}-${month}-${day} ${h}:${m}:${s}`;
+            const format = (n) => n.toString().padStart(2, '0');
+            const str = `${now.getFullYear()}-${format(now.getMonth()+1)}-${format(now.getDate())} ${format(now.getHours())}:${format(now.getMinutes())}:${format(now.getSeconds())}`;
+            document.getElementById('sys-clock').textContent = str;
         }
 
-        // --- Daily Word Feature ---
+        // --- Daily Word (Random from Global List) ---
         async function loadDailyWord() {
-            if(allWords.length === 0) return; // No words saved
+            // Pick random word from the embedded list
+            const randWord = dailyVocabulary[Math.floor(Math.random() * dailyVocabulary.length)];
             
-            // Pick random word
-            const randWord = allWords[Math.floor(Math.random() * allWords.length)].word;
-            
-            // Fetch detail for example sentence
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randWord}`);
                 if(!res.ok) return;
                 const data = await res.json();
                 const entry = data[0];
                 
-                // Find definition and example
                 const def = entry.meanings[0].definitions[0].definition;
-                const ex = entry.meanings[0].definitions[0].example || "No example available.";
+                const ex = entry.meanings[0].definitions[0].example || "No example sentence available.";
 
                 document.getElementById('daily-card').style.display = 'block';
-                document.getElementById('dw-word').textContent = entry.word;
+                document.getElementById('dw-word').innerHTML = `<span>${entry.word}</span> <small style="font-size:14px; color:#666;">(${entry.meanings[0].partOfSpeech})</small>`;
                 document.getElementById('dw-def').textContent = def;
                 document.getElementById('dw-ex').textContent = `"${ex}"`;
+
+                // Add search capability to daily word
+                document.getElementById('dw-word').onclick = () => {
+                    document.getElementById('word-input').value = entry.word;
+                    searchWord();
+                }
 
             } catch(e) { console.log("Daily word fetch failed"); }
         }
 
-        function searchDaily() {
-            const w = document.getElementById('dw-word').textContent;
-            document.getElementById('word-input').value = w;
-            searchWord();
-        }
+        function searchDaily() { /* Handled inline */ }
 
         // --- Project Logic ---
         function initProjects() {
@@ -399,7 +374,7 @@
             renderList(); updateSaveButtonState();
         }
 
-        // --- Search Logic ---
+        // --- Search ---
         async function searchWord() {
             const input = document.getElementById('word-input');
             const word = input.value.trim();
@@ -439,7 +414,6 @@
             } catch(e) { alert("Word not found"); }
         }
 
-        // --- Save Logic ---
         function toggleSaveWord() {
             if (!currentWordData) return;
             const existsIndex = allWords.findIndex(w => w.word.toLowerCase() === currentWordData.word.toLowerCase() && (w.project || 'General') === currentProject);
@@ -469,7 +443,6 @@
             else { btn.classList.remove('saved'); icon.textContent = '❤️'; text.textContent = 'Save'; }
         }
 
-        // --- Sidebar ---
         function renderList() {
             const el = document.getElementById('saved-list'); el.innerHTML = '';
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
@@ -484,26 +457,24 @@
         function delWord(id) { allWords = allWords.filter(w => w.id !== id); localStorage.setItem('dictWords', JSON.stringify(allWords)); renderList(); updateSaveButtonState(); }
         function clearAll() { if(confirm(`Delete ALL words in '${currentProject}'?`)) { allWords = allWords.filter(w => (w.project || 'General') !== currentProject); localStorage.setItem('dictWords', JSON.stringify(allWords)); renderList(); updateSaveButtonState(); } }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        function playAudio() { if(currentWordData && currentWordData.audio) new Audio(currentWordData.audio).play(); else if(currentWordData) { const u = new SpeechSynthesisUtterance(currentWordData.word); u.lang='en-US'; window.speechSynthesis.speak(u); } }
+        function playAudio() { 
+            if(currentWordData && currentWordData.audio) new Audio(currentWordData.audio).play(); 
+            else if(currentWordData) { const u = new SpeechSynthesisUtterance(currentWordData.word); u.lang='en-US'; window.speechSynthesis.speak(u); } 
+        }
 
-        // --- EXAM LOGIC (STRICT) ---
+        // --- UNIFIED EXAM LOGIC (STRICT TYPING ONLY) ---
         function showExamSetup() {
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
             if(projectWords.length === 0) return alert(`No words in '${currentProject}' to test!`);
             toggleSidebar(); document.getElementById('main-view').style.display = 'none'; document.getElementById('exam-setup').style.display = 'flex';
         }
 
-        function startExam(mode) {
-            examMode = mode;
+        function startExam() {
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
             examQueue = [...projectWords].sort(() => Math.random() - 0.5);
-            examIndex = 0; correctCount = 0; 
-            wrongWordsList = []; // Mode 1
-            strictResults = []; // Mode 2
+            examIndex = 0; correctCount = 0; strictResults = [];
 
             document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'flex';
-            document.getElementById('mode-listen-area').style.display = (mode === 'listening') ? 'block' : 'none';
-            document.getElementById('mode-type-area').style.display = (mode === 'typing') ? 'block' : 'none';
             loadQuestion();
         }
         
@@ -512,13 +483,7 @@
             const currentItem = examQueue[examIndex];
             document.getElementById('q-current').textContent = examIndex + 1; document.getElementById('q-total').textContent = examQueue.length;
             
-            if(examMode === 'listening') {
-                const box = document.getElementById('listen-black-box'); box.textContent = currentItem.word; box.classList.remove('revealed');
-                document.getElementById('btn-reveal').style.display = 'inline-block'; document.getElementById('judge-btns').style.display = 'none';
-            } else {
-                // Typing Mode
-                const input = document.getElementById('type-input'); input.value = ''; input.focus();
-            }
+            const input = document.getElementById('type-input'); input.value = ''; input.focus();
             setTimeout(playExamAudio, 500);
         }
 
@@ -528,33 +493,16 @@
             else { const u = new SpeechSynthesisUtterance(item.word); u.lang='en-US'; window.speechSynthesis.speak(u); }
         }
 
-        // Mode 2: Strict Check (No feedback until end)
         function checkTypingStrict() {
             const input = document.getElementById('type-input');
             const userVal = input.value.trim();
             const correctVal = examQueue[examIndex].word;
             
-            // Record result
             const isCorrect = (userVal.toLowerCase() === correctVal.toLowerCase());
             if(isCorrect) correctCount++;
             
-            strictResults.push({
-                word: correctVal,
-                userAns: userVal,
-                isCorrect: isCorrect
-            });
-
-            // Move next immediately
-            examIndex++;
-            loadQuestion();
-        }
-
-        // Mode 1: Self Check
-        function revealListening() { document.getElementById('listen-black-box').classList.add('revealed'); document.getElementById('btn-reveal').style.display = 'none'; document.getElementById('judge-btns').style.display = 'flex'; }
-        function handleJudge(isCorrect) {
-            if(isCorrect) correctCount++; 
-            else wrongWordsList.push(examQueue[examIndex]); 
-            setTimeout(() => { examIndex++; loadQuestion(); }, 500);
+            strictResults.push({ word: correctVal, userAns: userVal, isCorrect: isCorrect });
+            examIndex++; loadQuestion();
         }
 
         function showResults() {
@@ -565,30 +513,15 @@
 
             const container = document.getElementById('wrong-container'); container.innerHTML = '';
             
-            if(examMode === 'listening') {
-                if(wrongWordsList.length === 0) container.innerHTML = '<div style="color:green">Perfect Score! 🎉</div>';
-                else wrongWordsList.forEach(w => {
-                    const div = document.createElement('div'); div.className = 'wrong-item';
-                    div.innerHTML = `<span>${w.word}</span>`;
-                    container.appendChild(div);
-                });
-            } else {
-                // Typing Mode: Show Full Report
-                strictResults.forEach(r => {
-                    const div = document.createElement('div'); div.className = 'wrong-item';
-                    if(r.isCorrect) {
-                        div.innerHTML = `<span class="correct-ans">✅ ${r.word}</span>`;
-                    } else {
-                        div.innerHTML = `
-                            <div>
-                                <span class="correct-ans">${r.word}</span><br>
-                                <span class="user-ans">Your ans: ${r.userAns || "(empty)"}</span>
-                            </div>
-                        `;
-                    }
-                    container.appendChild(div);
-                });
-            }
+            strictResults.forEach(r => {
+                const div = document.createElement('div'); div.className = 'wrong-item';
+                if(r.isCorrect) {
+                    div.innerHTML = `<span class="correct-ans">✅ ${r.word}</span>`;
+                } else {
+                    div.innerHTML = `<div><span class="correct-ans">${r.word}</span><br><span class="user-ans">Your ans: ${r.userAns || "(empty)"}</span></div>`;
+                }
+                container.appendChild(div);
+            });
         }
 
         function closeExam() {
