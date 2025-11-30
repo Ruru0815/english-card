@@ -29,6 +29,9 @@
             transition: box-shadow 0.3s ease;
         }
 
+        .glow-success { box-shadow: inset 0 0 50px var(--success) !important; }
+        .glow-error { box-shadow: inset 0 0 50px var(--error) !important; }
+
         /* Clock (Bottom Left) */
         .system-clock {
             position: fixed; bottom: 15px; left: 20px; font-family: monospace; font-size: 16px;
@@ -75,10 +78,9 @@
         /* Main View */
         .container { margin-top: 80px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; }
         
-        /* Search Input */
         .search-input { width: 100%; padding: 20px; font-size: 20px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; margin-bottom: 30px; box-sizing: border-box; }
         
-        /* Daily Word Card (Moved Below Input) */
+        /* Daily Word Card */
         .daily-card {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border: 1px solid #bae6fd;
@@ -87,7 +89,7 @@
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
-            display: none; /* Initially hidden */
+            display: none; 
             animation: fadeIn 0.5s;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
@@ -144,17 +146,28 @@
         }
         .audio-big-btn:active { transform: scale(0.95); }
         
+        /* Black Box for Listening Mode */
+        .black-box-mask {
+            background-color: black; color: black; padding: 10px 20px; border-radius: 8px; user-select: none;
+            display: inline-block; font-size: 40px; font-weight: bold; font-family: var(--font-serif); min-width: 200px;
+        }
+        .revealed { background-color: transparent; color: var(--text-main); }
+
         .type-input {
             font-size: 32px; text-align: center; padding: 10px; border: none; border-bottom: 3px solid #ddd;
             outline: none; width: 100%; font-family: var(--font-serif); font-weight: bold; text-transform: lowercase;
         }
+        .judge-btns { display: none; gap: 20px; justify-content: center; margin-top: 30px; }
+        .btn-judge { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; color: white; }
+        .btn-yes { background: var(--success); }
+        .btn-no { background: var(--error); }
+
         .result-box { text-align: center; width: 90%; max-width: 600px; }
         .score-circle {
             width: 150px; height: 150px; border-radius: 50%; border: 10px solid var(--primary);
             display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;
             font-size: 40px; font-weight: 900; color: var(--primary);
         }
-        
         .wrong-list { text-align: left; max-height: 300px; overflow-y: auto; background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .wrong-item { border-bottom: 1px solid #ddd; padding: 10px 0; display:flex; justify-content: space-between; align-items: center; }
         .user-ans { color: var(--error); text-decoration: line-through; margin-right: 10px; font-size: 14px;}
@@ -189,7 +202,7 @@
             </div>
         </div>
 
-        <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Spelling Test 🎓</button>
+        <button class="sidebar-btn btn-test" onclick="showExamSetup()">Start Test 🎓</button>
 
         <div id="saved-list" style="flex:1; overflow-y:auto;"></div>
         <button onclick="clearAll()" style="color:red; background:none; border:1px solid red; padding:5px; margin-top:10px; cursor:pointer; width:100%; border-radius:4px;">Clear Current List</button>
@@ -200,7 +213,7 @@
         <input type="text" class="search-input" id="word-input" placeholder="Type a word..." onkeydown="if(event.key==='Enter') searchWord()">
 
         <div class="daily-card" id="daily-card">
-            <h3>🌟 Random Daily Word (General)</h3>
+            <h3>🌟 Daily Word (Resets at 00:00)</h3>
             <div class="daily-word" id="dw-word" onclick="searchDaily()">
                 <span>Loading...</span>
             </div>
@@ -229,28 +242,32 @@
 
     <div class="exam-overlay" id="exam-setup">
         <div class="mode-select-box">
-            <h1>Spelling Test</h1>
-            <p style="color:#666; margin-bottom:20px;">
-                Listen to the audio and type the word.<br>Results will be shown at the end.
-            </p>
-            <button class="mode-btn" onclick="startExam()">▶️ Start Test</button>
+            <h1>Choose Exam Mode</h1>
+            <button class="mode-btn" onclick="startExam('listening')">👂 Listening Mode<br><span style="font-size:12px; color:#666;">Black box + Self check</span></button>
+            <button class="mode-btn" onclick="startExam('typing')">⌨️ Typing Mode<br><span style="font-size:12px; color:#666;">Type & Check at end</span></button>
             <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; text-decoration:underline; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
     <div class="exam-overlay" id="exam-active">
         <div class="exam-box">
-            <div style="color:#666; margin-bottom:10px;">Listen & Type</div>
             <button class="audio-big-btn" onclick="playExamAudio()">🔊</button>
             
-            <div id="mode-type-area">
+            <div id="mode-listen-area" style="display:none;">
+                <div id="listen-black-box" class="black-box-mask">WORD</div>
+                <div style="margin-top:40px;"><button id="btn-reveal" onclick="revealListening()" style="padding:10px 30px; font-size:16px; cursor:pointer;">Show Answer</button></div>
+                <div class="judge-btns" id="judge-btns">
+                    <button class="btn-judge btn-no" onclick="handleJudge(false)">❌ Forgot</button>
+                    <button class="btn-judge btn-yes" onclick="handleJudge(true)">✅ Correct</button>
+                </div>
+            </div>
+
+            <div id="mode-type-area" style="display:none;">
                 <input type="text" id="type-input" class="type-input" placeholder="Type answer..." autocomplete="off" onkeydown="if(event.key==='Enter') checkTypingStrict()">
                 <div style="margin-top:20px; color:#999; font-size:14px;">Press Enter to submit</div>
             </div>
 
-            <div style="margin-top:40px; color:#ccc; font-weight:bold; font-size:18px;">
-                <span id="q-current">1</span> / <span id="q-total">10</span>
-            </div>
+            <div style="margin-top:30px; color:#ccc;"><span id="q-current">1</span> / <span id="q-total">10</span></div>
             <button onclick="closeExam()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Exit</button>
         </div>
     </div>
@@ -270,7 +287,7 @@
     </div>
 
     <script>
-        // --- Data & State ---
+        // Data State
         let allWords = JSON.parse(localStorage.getItem('dictWords')) || [];
         let projectList = JSON.parse(localStorage.getItem('dictProjects')) || ['General'];
         let currentProject = localStorage.getItem('lastProject') || 'General';
@@ -279,10 +296,12 @@
         // Exam State
         let examQueue = [];
         let examIndex = 0;
+        let examMode = '';
         let correctCount = 0;
+        let wrongWordsList = [];
         let strictResults = []; 
 
-        // Daily Word List (100 High-Frequency Academic/TOEIC Words)
+        // 100 High-Frequency Words
         const dailyVocabulary = [
             "ambitious", "benefit", "circumstance", "distinct", "elaborate", "fascinate", "genuine", "hostile", "inevitable", "justify",
             "knowledge", "leisure", "maintain", "negotiate", "obstacle", "potential", "qualify", "relevant", "significant", "tolerate",
@@ -295,7 +314,7 @@
             "launch", "mention", "network", "option", "phase", "range", "sector", "target", "union", "volume"
         ];
 
-        // --- Init ---
+        // Init
         initProjects();
         renderList();
         updateTime();
@@ -307,8 +326,10 @@
             if (queryWord) {
                 document.getElementById('word-input').value = queryWord;
                 searchWord();
+            } else {
+                // Only load daily word if NOT searching
+                loadDailyWord(); 
             }
-            loadDailyWord();
         };
 
         // --- Clock ---
@@ -319,13 +340,31 @@
             document.getElementById('sys-clock').textContent = str;
         }
 
-        // --- Daily Word (Random from Global List) ---
+        // --- Daily Word (Smart 00:00 Reset) ---
         async function loadDailyWord() {
-            // Pick random word from the embedded list
-            const randWord = dailyVocabulary[Math.floor(Math.random() * dailyVocabulary.length)];
+            // Get today's date string YYYY-MM-DD
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+            
+            // Check storage
+            let record = JSON.parse(localStorage.getItem('daily_word_record'));
+            let targetWord = "";
+
+            if (record && record.date === todayStr) {
+                // Same day, keep same word
+                targetWord = record.word;
+            } else {
+                // New day or first run, pick new word
+                targetWord = dailyVocabulary[Math.floor(Math.random() * dailyVocabulary.length)];
+                // Save it
+                localStorage.setItem('daily_word_record', JSON.stringify({
+                    date: todayStr,
+                    word: targetWord
+                }));
+            }
             
             try {
-                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randWord}`);
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${targetWord}`);
                 if(!res.ok) return;
                 const data = await res.json();
                 const entry = data[0];
@@ -333,12 +372,12 @@
                 const def = entry.meanings[0].definitions[0].definition;
                 const ex = entry.meanings[0].definitions[0].example || "No example sentence available.";
 
-                document.getElementById('daily-card').style.display = 'block';
+                const card = document.getElementById('daily-card');
+                card.style.display = 'block';
                 document.getElementById('dw-word').innerHTML = `<span>${entry.word}</span> <small style="font-size:14px; color:#666;">(${entry.meanings[0].partOfSpeech})</small>`;
                 document.getElementById('dw-def').textContent = def;
                 document.getElementById('dw-ex').textContent = `"${ex}"`;
 
-                // Add search capability to daily word
                 document.getElementById('dw-word').onclick = () => {
                     document.getElementById('word-input').value = entry.word;
                     searchWord();
@@ -380,6 +419,9 @@
             const word = input.value.trim();
             if(!word) return;
             
+            // HIDE Daily Word on search
+            document.getElementById('daily-card').style.display = 'none';
+
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 if(!res.ok) throw new Error();
@@ -462,19 +504,24 @@
             else if(currentWordData) { const u = new SpeechSynthesisUtterance(currentWordData.word); u.lang='en-US'; window.speechSynthesis.speak(u); } 
         }
 
-        // --- UNIFIED EXAM LOGIC (STRICT TYPING ONLY) ---
+        // --- EXAM LOGIC ---
         function showExamSetup() {
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
             if(projectWords.length === 0) return alert(`No words in '${currentProject}' to test!`);
             toggleSidebar(); document.getElementById('main-view').style.display = 'none'; document.getElementById('exam-setup').style.display = 'flex';
         }
 
-        function startExam() {
+        function startExam(mode) {
+            examMode = mode;
             const projectWords = allWords.filter(w => (w.project || 'General') === currentProject);
             examQueue = [...projectWords].sort(() => Math.random() - 0.5);
-            examIndex = 0; correctCount = 0; strictResults = [];
+            examIndex = 0; correctCount = 0; 
+            wrongWordsList = []; // Mode 1 data
+            strictResults = []; // Mode 2 data
 
             document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-active').style.display = 'flex';
+            document.getElementById('mode-listen-area').style.display = (mode === 'listening') ? 'block' : 'none';
+            document.getElementById('mode-type-area').style.display = (mode === 'typing') ? 'block' : 'none';
             loadQuestion();
         }
         
@@ -483,7 +530,13 @@
             const currentItem = examQueue[examIndex];
             document.getElementById('q-current').textContent = examIndex + 1; document.getElementById('q-total').textContent = examQueue.length;
             
-            const input = document.getElementById('type-input'); input.value = ''; input.focus();
+            if(examMode === 'listening') {
+                const box = document.getElementById('listen-black-box'); box.textContent = currentItem.word; box.classList.remove('revealed');
+                document.getElementById('btn-reveal').style.display = 'inline-block'; document.getElementById('judge-btns').style.display = 'none';
+            } else {
+                // Typing Mode
+                const input = document.getElementById('type-input'); input.value = ''; input.focus();
+            }
             setTimeout(playExamAudio, 500);
         }
 
@@ -493,6 +546,7 @@
             else { const u = new SpeechSynthesisUtterance(item.word); u.lang='en-US'; window.speechSynthesis.speak(u); }
         }
 
+        // Mode 2: Strict Typing (Results at end)
         function checkTypingStrict() {
             const input = document.getElementById('type-input');
             const userVal = input.value.trim();
@@ -505,6 +559,14 @@
             examIndex++; loadQuestion();
         }
 
+        // Mode 1: Listening (Immediate Self-Check)
+        function revealListening() { document.getElementById('listen-black-box').classList.add('revealed'); document.getElementById('btn-reveal').style.display = 'none'; document.getElementById('judge-btns').style.display = 'flex'; }
+        function handleJudge(isCorrect) {
+            if(isCorrect) correctCount++; 
+            else wrongWordsList.push(examQueue[examIndex]); 
+            setTimeout(() => { examIndex++; loadQuestion(); }, 500);
+        }
+
         function showResults() {
             document.getElementById('exam-active').style.display = 'none'; document.getElementById('result-view').style.display = 'flex';
             document.getElementById('result-score').textContent = (Math.round((correctCount / examQueue.length) * 100) || 0) + '%';
@@ -513,15 +575,25 @@
 
             const container = document.getElementById('wrong-container'); container.innerHTML = '';
             
-            strictResults.forEach(r => {
-                const div = document.createElement('div'); div.className = 'wrong-item';
-                if(r.isCorrect) {
-                    div.innerHTML = `<span class="correct-ans">✅ ${r.word}</span>`;
-                } else {
-                    div.innerHTML = `<div><span class="correct-ans">${r.word}</span><br><span class="user-ans">Your ans: ${r.userAns || "(empty)"}</span></div>`;
-                }
-                container.appendChild(div);
-            });
+            if(examMode === 'listening') {
+                if(wrongWordsList.length === 0) container.innerHTML = '<div style="color:green">Perfect Score! 🎉</div>';
+                else wrongWordsList.forEach(w => {
+                    const div = document.createElement('div'); div.className = 'wrong-item';
+                    div.innerHTML = `<span class="correct-ans">${w.word}</span>`;
+                    container.appendChild(div);
+                });
+            } else {
+                // Typing Mode: Detailed Report
+                strictResults.forEach(r => {
+                    const div = document.createElement('div'); div.className = 'wrong-item';
+                    if(r.isCorrect) {
+                        div.innerHTML = `<span class="correct-ans">✅ ${r.word}</span>`;
+                    } else {
+                        div.innerHTML = `<div><span class="correct-ans">${r.word}</span><br><span class="user-ans">Your ans: ${r.userAns || "(empty)"}</span></div>`;
+                    }
+                    container.appendChild(div);
+                });
+            }
         }
 
         function closeExam() {
