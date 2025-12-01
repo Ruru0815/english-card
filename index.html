@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Dictionary & Exam Suite</title>
+    <title>Private Dictionary & Exam Suite</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -32,9 +32,6 @@
             overflow-x: hidden;
             transition: box-shadow 0.3s ease;
         }
-
-        /* Utility Class for Auth */
-        .auth-only { display: none !important; } /* 預設隱藏，登入後由 JS 顯示 */
 
         .glow-success { box-shadow: inset 0 0 50px var(--success) !important; }
         .glow-error { box-shadow: inset 0 0 50px var(--error) !important; }
@@ -138,6 +135,11 @@
         .modal-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         .modal-btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
         .modal-link { color: #666; cursor: pointer; font-size: 12px; margin-top: 15px; display: block; text-decoration: underline; }
+        
+        /* 錯誤訊息樣式 */
+        .error-msg {
+            color: var(--error); font-size: 14px; margin-top: 5px; display: none; font-weight: bold;
+        }
 
         /* Exam Overlays */
         .exam-overlay {
@@ -202,8 +204,11 @@
             <h2>🔐 Log In</h2>
             <input type="email" id="email" class="modal-input" placeholder="Email">
             <input type="password" id="password" class="modal-input" placeholder="Password">
+            
+            <div id="login-error" class="error-msg">帳號或密碼有誤，請再輸入一次</div>
+            
             <button class="modal-btn" onclick="handleAuth()">Submit</button>
-            <div class="modal-link" onclick="document.getElementById('login-modal').style.display='none'">Cancel</div>
+            <div class="modal-link" onclick="closeLogin()">Cancel</div>
         </div>
     </div>
 
@@ -381,37 +386,24 @@
             }
         };
 
-        // --- Auth Logic (Updated for Guest Mode) ---
+        // --- Auth Logic ---
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Logged In
                 currentUser = user;
                 document.getElementById('user-display').textContent = user.email;
                 document.getElementById('auth-btn').textContent = "Log Out";
                 document.getElementById('auth-btn').onclick = logout;
                 document.getElementById('login-modal').style.display = 'none';
-                
-                // Show Auth-Only Elements
-                document.querySelectorAll('.auth-only').forEach(el => el.style.display = ''); // Restore default display
-                
+                document.querySelectorAll('.auth-only').forEach(el => el.style.display = '');
                 loadUserData();
             } else {
-                // Logged Out (Guest)
                 currentUser = null;
                 document.getElementById('user-display').textContent = "";
                 document.getElementById('auth-btn').textContent = "Log In";
                 document.getElementById('auth-btn').onclick = openLogin;
-                
-                // Hide Auth-Only Elements
                 document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
-                
-                // Clear local data view
-                allWords = [];
-                projectList = ['General'];
-                renderList();
-                initProjects();
-                
-                // Close sidebar if open
+                allWords = []; projectList = ['General'];
+                renderList(); initProjects();
                 document.getElementById('sidebar').classList.remove('open');
             }
         });
@@ -432,11 +424,29 @@
             db.collection('users').doc(currentUser.uid).set({ words: allWords, projects: projectList });
         }
 
-        function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+        // Login Logic with Error Handling
+        function openLogin() { 
+            document.getElementById('login-modal').style.display = 'flex'; 
+            document.getElementById('login-error').style.display = 'none'; // reset error
+            document.getElementById('password').value = ''; 
+        }
+        function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
+        
         function handleAuth() {
             const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Login Failed: " + e.message));
+            const passInput = document.getElementById('password');
+            const pass = passInput.value;
+            const errorMsg = document.getElementById('login-error');
+
+            errorMsg.style.display = 'none'; // hide previous error
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch(e => {
+                    // Login Failed
+                    errorMsg.style.display = 'block'; // show error
+                    passInput.value = ''; // clear password
+                    passInput.focus();
+                });
         }
         function logout() { auth.signOut(); }
 
@@ -534,14 +544,13 @@
                 document.getElementById('entry-result').style.display = 'block';
                 input.value = '';
                 
-                // Only update save state if logged in
                 if(currentUser) updateSaveButtonState();
 
             } catch(e) { alert("Word not found"); }
         }
 
         function toggleSaveWord() {
-            if (!currentUser) return; // Should be hidden, but double check
+            if (!currentUser) return;
             if (!currentWordData) return;
             const existsIndex = allWords.findIndex(w => w.word.toLowerCase() === currentWordData.word.toLowerCase() && (w.project || 'General') === currentProject);
             const btn = document.getElementById('btn-save');
@@ -628,20 +637,16 @@
             else { const u = new SpeechSynthesisUtterance(item.word); u.lang='en-US'; window.speechSynthesis.speak(u); }
         }
 
-        // Mode 2: Strict Typing
         function checkTypingStrict() {
             const input = document.getElementById('type-input');
             const userVal = input.value.trim();
             const correctVal = examQueue[examIndex].word;
-            
             const isCorrect = (userVal.toLowerCase() === correctVal.toLowerCase());
             if(isCorrect) correctCount++;
-            
             strictResults.push({ word: correctVal, userAns: userVal, isCorrect: isCorrect });
             examIndex++; loadQuestion();
         }
 
-        // Mode 1: Self Check Listening
         function revealListening() { document.getElementById('listen-black-box').classList.add('revealed'); document.getElementById('btn-reveal').style.display = 'none'; document.getElementById('judge-btns').style.display = 'flex'; }
         function handleJudge(isCorrect) {
             if(isCorrect) correctCount++; else wrongWordsList.push(examQueue[examIndex]); 
