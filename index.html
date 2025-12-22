@@ -511,18 +511,26 @@
             const word = input.value.trim();
             if(!word) return;
             
+            // 隱藏每日單字卡
             document.getElementById('daily-card').style.display = 'none';
 
             try {
                 const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                if(!res.ok) throw new Error();
+                
+                // --- 關鍵修改：如果 API 找不到 (404)，不跳出錯誤，而是進入「手動建立模式」 ---
+                if(!res.ok) {
+                    throw new Error("API_MISSING");
+                }
+
                 const data = await res.json();
                 
+                // 1. 嘗試找美式發音
                 let audioSrc = null;
                 for(const entry of data) {
                     const us = entry.phonetics.find(p => p.audio && p.audio.includes('-us.mp3'));
                     if(us) { audioSrc = us.audio; break; }
                 }
+                // 2. 如果沒美式，找任意發音
                 if(!audioSrc) {
                     for(const entry of data) {
                         const any = entry.phonetics.find(p => p.audio);
@@ -531,22 +539,54 @@
                 }
 
                 const entry = data[0];
-                document.getElementById('disp-word').textContent = entry.word;
-                document.getElementById('cambridge-link').href = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${entry.word}`;
-                document.getElementById('disp-phonetic').textContent = entry.phonetic || "";
-                
-                currentWordData = { word: entry.word, audio: audioSrc, phonetic: entry.phonetic || "" };
+                renderWordResult(entry.word, entry.phonetic || "", audioSrc, entry.meanings);
 
-                document.getElementById('meanings-area').innerHTML = entry.meanings.map(m => 
+            } catch(e) {
+                // --- 這裡處理「查不到」的情況 ---
+                console.log("Word not found in API, using fallback.");
+                
+                // 雖然 API 查不到，我們還是強制顯示這個單字
+                // 這樣你就可以存檔、發音(用機器人)、考試了
+                renderWordResult(
+                    word, 
+                    "(No phonetic)", 
+                    null, // 沒有 API 音檔，playAudio 會自動轉用機器人
+                    []    // 沒有解釋，UI 會顯示預設文字
+                );
+            }
+            
+            input.value = '';
+        }
+
+        // --- 輔助函式：負責把單字畫在螢幕上 ---
+        function renderWordResult(wordText, phoneticText, audioSrc, meanings) {
+            // 1. 顯示單字與音標
+            document.getElementById('disp-word').textContent = wordText;
+            document.getElementById('disp-phonetic').textContent = phoneticText;
+            
+            // 2. 更新劍橋字典連結 (讓你可以去查詳細意思)
+            document.getElementById('cambridge-link').href = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${wordText}`;
+            
+            // 3. 設定全域變數 (讓儲存功能知道現在是哪個字)
+            currentWordData = { 
+                word: wordText, 
+                audio: audioSrc, 
+                phonetic: phoneticText 
+            };
+
+            // 4. 顯示解釋 (如果沒有解釋，顯示提示文字)
+            const meaningsContainer = document.getElementById('meanings-area');
+            if (meanings && meanings.length > 0) {
+                meaningsContainer.innerHTML = meanings.map(m => 
                     `<div><span style="font-style:italic;color:#666;">${m.partOfSpeech}</span><div class="definition">${m.definitions[0].definition}</div></div>`
                 ).join('');
+            } else {
+                meaningsContainer.innerHTML = `<div style="color:#666; margin-top:10px;">⚠️ API 查無此字詳解。<br>但你仍可<b>儲存</b>此字，並使用<b>機器人發音</b>，或點擊上方按鈕前往劍橋字典查詢。</div>`;
+            }
 
-                document.getElementById('entry-result').style.display = 'block';
-                input.value = '';
-                
-                if(currentUser) updateSaveButtonState();
-
-            } catch(e) { alert("Word not found"); }
+            // 5. 顯示結果區塊並更新按鈕狀態
+            document.getElementById('entry-result').style.display = 'block';
+            if(currentUser) updateSaveButtonState();
         }
 
         function toggleSaveWord() {
@@ -685,3 +725,4 @@
     </script>
 </body>
 </html>
+
