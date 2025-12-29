@@ -74,7 +74,6 @@
             user-select: none;
         }
 
-        /* 挑戰按鈕 */
         .challenge-btn {
             background-color: var(--accent);
             color: white;
@@ -89,7 +88,6 @@
         }
         .challenge-btn:hover { background-color: #d97706; transform: translateY(-2px); }
 
-        /* 句子列表樣式 */
         .category-title {
             background: var(--secondary);
             color: var(--primary);
@@ -120,12 +118,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            min-height: 30px; /* 確保隱藏時高度還在 */
         }
         
         .speaker-icon { 
             font-size: 18px; 
             opacity: 0.6; 
-            flex-shrink: 0; /* 防止喇叭被擠壓 */
+            flex-shrink: 0;
             transition: 0.2s;
         }
         .en-text:hover .speaker-icon { opacity: 1; transform: scale(1.1); }
@@ -137,57 +136,38 @@
             font-size: 16px;
         }
 
-        /* --- 核心：遮住英文的樣式 --- */
+        /* --- 核心修改：隱藏英文的樣式 --- */
         .text-content {
-            transition: all 0.3s ease;
-            border-radius: 4px;
-            padding: 2px 5px;
+            transition: opacity 0.3s ease; /* 柔和的淡入淡出 */
         }
 
-        /* 當 .container 有 hide-en class 時 */
+        /* 當開啟遮蔽模式時 */
         .hide-en .text-content {
-            background-color: black;
-            color: black; /* 文字變黑，隱藏 */
-            user-select: none; /* 防止被選取複製 */
+            opacity: 0; /* 完全透明 (看不見，但佔位) */
         }
 
-        /* 滑鼠滑過去時，顯示文字 (偷看答案) */
+        /* 滑鼠滑過去時顯示 (偷看答案) */
         .hide-en .en-text:hover .text-content {
-            background-color: #fef08a; /* 淺黃色底 */
-            color: #d97706; /* 深橘色字 */
+            opacity: 1; /* 浮現 */
         }
 
         /* --- 挑戰模式全螢幕 (Overlay) --- */
         .flashcard-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 500;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 500; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
         }
-
         .card-box {
-            background: white;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            padding: 40px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 2px solid var(--secondary);
+            background: white; width: 100%; max-width: 600px; text-align: center;
+            padding: 40px 20px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 2px solid var(--secondary);
         }
-
         .card-zh { font-size: 32px; font-weight: bold; color: #333; margin-bottom: 30px; line-height: 1.4; }
         .card-en {
             font-size: 24px; color: var(--primary); font-weight: 500; margin-bottom: 30px;
             display: none; padding: 20px; background: var(--secondary); border-radius: 10px; cursor: pointer;
         }
-
         .fc-controls button {
             padding: 15px 40px; font-size: 18px; border: none; border-radius: 50px;
             cursor: pointer; font-weight: bold; margin: 10px; transition: 0.2s;
@@ -218,8 +198,7 @@
             </label>
         </div>
 
-        <div id="content-area">
-            </div>
+        <div id="content-area"></div>
     </div>
 
     <div class="flashcard-overlay" id="flashcard-view">
@@ -250,7 +229,6 @@
             { category: "Transportation (交通)", sentences: [ { en: "How do you get to school?", zh: "你如何上學？" }, { en: "I go to school by scooter.", zh: "我騎機車上學。" }, { en: "How can I get to the station?", zh: "我怎麼去車站？" }, { en: "You can take the bus to the station.", zh: "你可以搭公車去車站。" }, { en: "I'll take the MRT to the park.", zh: "我搭捷運去公園。" } ] }
         ];
 
-        // --- 初始化列表 ---
         const contentArea = document.getElementById('content-area');
         examData.forEach(section => {
             const sectionDiv = document.createElement('div');
@@ -271,15 +249,15 @@
             contentArea.appendChild(sectionDiv);
         });
 
-        // --- 功能函數 ---
+        // --- 修正後的發音 (原汁原味) ---
         function speak(text) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US'; u.rate = 0.9;
+            u.lang = 'en-US';
+            // 不設定 rate，使用預設值
             window.speechSynthesis.speak(u);
         }
 
-        // 切換遮蔽英文
         function toggleEnglish() {
             const checkbox = document.getElementById('toggle-en');
             const container = document.querySelector('.container');
@@ -287,7 +265,6 @@
             else container.classList.remove('hide-en');
         }
 
-        // --- 挑戰模式 (Flashcard) 邏輯 ---
         let flashcardQueue = [];
         let fcIndex = 0;
 
