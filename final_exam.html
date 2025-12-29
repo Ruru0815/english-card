@@ -249,13 +249,24 @@
             contentArea.appendChild(sectionDiv);
         });
 
-        // --- 修正後的發音 (原汁原味) ---
+       // --- 修正版：使用 Google 線上發音 (乾淨女聲) ---
         function speak(text) {
+            // 1. 先停止瀏覽器原本正在講的話
             window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            // 不設定 rate，使用預設值
-            window.speechSynthesis.speak(u);
+
+            // 2. 使用 Google Translate 的語音介面 (這就是那個好聽的女聲)
+            const encodedText = encodeURIComponent(text);
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodedText}`;
+            
+            // 3. 播放
+            const audio = new Audio(url);
+            audio.play().catch(e => {
+                // 如果 Google 連不上 (例如沒網路)，才退回去用機器人
+                console.error("Google TTS failed, fallback to robot.", e);
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'en-US';
+                window.speechSynthesis.speak(u);
+            });
         }
 
         function toggleEnglish() {
