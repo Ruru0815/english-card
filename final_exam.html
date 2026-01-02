@@ -59,7 +59,7 @@
         .controls {
             margin-bottom: 20px;
             display: flex;
-            justify-content: center; /* 置中按鈕 */
+            justify-content: center;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
@@ -194,10 +194,10 @@
 
         <div class="controls">
             <button class="mode-btn btn-mode1" onclick="startFlashcardMode()">
-                🔥 考試 I：口說挑戰
+                🔥 考試 I：口說挑戰 (隨機10題)
             </button>
             <button class="mode-btn btn-mode2" onclick="startExam2Mode()">
-                📝 考試 II：填空特訓
+                📝 考試 II：填空特訓 (固定10題)
             </button>
         </div>
         
@@ -228,7 +228,7 @@
     <div class="overlay-view" id="exam2-view">
         <button class="btn-exit" onclick="exitOverlay()">❌ 退出</button>
         <div class="exam2-container">
-            <h2 class="exam2-title">📝 隨機填空測驗 (10題)</h2>
+            <h2 class="exam2-title">📝 精選填空測驗 (固定10題)</h2>
             <div id="exam2-list">
                 </div>
             <button onclick="startExam2Mode()" style="display:block; margin:30px auto; padding:15px 40px; background:var(--primary); color:white; border:none; border-radius:30px; font-size:18px; cursor:pointer;">🔄 再考一次</button>
@@ -236,8 +236,7 @@
     </div>
 
     <script>
-        // --- 完整資料庫 (包含填空題資訊) ---
-        // clz: 填空題題目 (Cloze), full: 完整句子
+        // --- 完整資料庫 (用於列表和考試I隨機抽題) ---
         const fullData = [
             { cat: "Basic Info", zh: "你來自那裏?", clz: "Where are you ______?", full: "Where are you from?" },
             { cat: "Basic Info", zh: "請打開袋子.", clz: "Please ______ the bag.", full: "Please open the bag." },
@@ -286,9 +285,22 @@
             { cat: "In-Flight", zh: "請繫好安全帶。", clz: "Please keep your seat ______ ______.", full: "Please keep your seat belt fastened." }
         ];
 
+        // --- 考試 II 固定題庫 (對應原始 10 張圖片) ---
+        const fixedExam2Data = [
+            { cat: "Basic Info", zh: "你來自那裏?", clz: "Where are you ______?", full: "Where are you from?" },
+            { cat: "Basic Info", zh: "請打開袋子.", clz: "Please ______ the bag.", full: "Please open the bag." },
+            { cat: "Customs", zh: "你有植物或肉類製品嗎?", clz: "Do you have any ______ or meat ______?", full: "Do you have any plants or meat products?" },
+            { cat: "Immigration", zh: "你姓什麼?", clz: "What is your ______ name?", full: "What is your last name?" },
+            { cat: "Immigration", zh: "你此行的目的是什麼?", clz: "What is the ______ of your ______?", full: "What is the purpose of your visit?" },
+            { cat: "Boarding", zh: "7點30分在9號門登機。", clz: "You can ______ at ______ 9 at ______.", full: "You can board at gate 9 at 7:30." },
+            { cat: "Boarding", zh: "PW-854 班機正在登機。", clz: "Flight PW-854 is now ______.", full: "Flight PW-854 is now boarding." },
+            { cat: "Baggage", zh: "行李在12號轉盤。", clz: "The bags will come out on ______ number ______.", full: "The bags will come out on carousel number 12." },
+            { cat: "Immigration", zh: "你要停留多久?", clz: "How ______ will you be ______?", full: "How long will you be staying?" },
+            { cat: "In-Flight", zh: "我吃素。", clz: "I am a ______.", full: "I am a vegetarian." }
+        ];
+
         // --- 初始化列表 (Dictionary Mode) ---
         const contentArea = document.getElementById('content-area');
-        // 分類整理
         const categories = {};
         fullData.forEach(item => {
             if(!categories[item.cat]) categories[item.cat] = [];
@@ -336,7 +348,7 @@
             document.getElementById('list-view').style.display = 'block';
         }
 
-        // --- 考試 I: Flashcard Logic ---
+        // --- 考試 I: Flashcard Logic (隨機抽10題) ---
         let flashcardQueue = [];
         let fcIndex = 0;
 
@@ -368,9 +380,10 @@
         }
         function nextCard() { fcIndex++; showCard(); }
 
-        // --- 考試 II: Exam 2 (Cloze) Logic ---
+        // --- 考試 II: Exam 2 (Cloze) Logic (固定這10題) ---
         function startExam2Mode() {
-            const questions = [...fullData].sort(() => Math.random() - 0.5).slice(0, 10);
+            // 使用固定的題庫，不隨機
+            const questions = fixedExam2Data; 
             const container = document.getElementById('exam2-list');
             container.innerHTML = '';
 
