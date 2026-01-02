@@ -11,6 +11,7 @@
             --text-main: #1f2937;
             --border: #e5e7eb;
             --accent: #f59e0b;
+            --success: #22c55e;
         }
 
         body {
@@ -58,10 +59,10 @@
         .controls {
             margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* 置中按鈕 */
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
 
         .toggle-label {
@@ -74,20 +75,27 @@
             user-select: none;
         }
 
-        .challenge-btn {
-            background-color: var(--accent);
+        .mode-btn {
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
             font-size: 16px;
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .challenge-btn:hover { background-color: #d97706; transform: translateY(-2px); }
+        .btn-mode1 { background-color: var(--accent); }
+        .btn-mode1:hover { background-color: #d97706; transform: translateY(-2px); }
+        
+        .btn-mode2 { background-color: var(--success); }
+        .btn-mode2:hover { background-color: #15803d; transform: translateY(-2px); }
 
+        /* 句子列表樣式 */
         .category-title {
             background: var(--secondary);
             color: var(--primary);
@@ -110,58 +118,30 @@
         .sentence-row:hover { background-color: #f9f9f9; }
 
         .en-text {
-            flex: 1;
-            font-size: 18px;
-            font-weight: 500;
-            cursor: pointer;
-            color: #2563eb;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 30px; /* 確保隱藏時高度還在 */
+            flex: 1; font-size: 18px; font-weight: 500; cursor: pointer; color: #2563eb;
+            display: flex; align-items: center; gap: 10px; min-height: 30px;
         }
-        
-        .speaker-icon { 
-            font-size: 18px; 
-            opacity: 0.6; 
-            flex-shrink: 0;
-            transition: 0.2s;
-        }
+        .speaker-icon { font-size: 18px; opacity: 0.6; flex-shrink: 0; transition: 0.2s; }
         .en-text:hover .speaker-icon { opacity: 1; transform: scale(1.1); }
+        .zh-text { flex: 1; text-align: right; color: #4b5563; font-size: 16px; }
 
-        .zh-text {
-            flex: 1;
-            text-align: right;
-            color: #4b5563;
-            font-size: 16px;
-        }
+        /* 隱藏英文樣式 */
+        .text-content { transition: opacity 0.3s ease; }
+        .hide-en .text-content { opacity: 0; }
+        .hide-en .en-text:hover .text-content { opacity: 1; }
 
-        /* --- 核心修改：隱藏英文的樣式 --- */
-        .text-content {
-            transition: opacity 0.3s ease; /* 柔和的淡入淡出 */
-        }
-
-        /* 當開啟遮蔽模式時 */
-        .hide-en .text-content {
-            opacity: 0; /* 完全透明 (看不見，但佔位) */
-        }
-
-        /* 滑鼠滑過去時顯示 (偷看答案) */
-        .hide-en .en-text:hover .text-content {
-            opacity: 1; /* 浮現 */
-        }
-
-        /* --- 挑戰模式全螢幕 (Overlay) --- */
-        .flashcard-overlay {
+        /* --- 全螢幕覆蓋層 --- */
+        .overlay-view {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 500; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box;
+            background: #f0f9ff; z-index: 500; display: none;
+            overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
+
+        /* --- 考試 1: 挑戰模式 (Flashcard) --- */
         .card-box {
             background: white; width: 100%; max-width: 600px; text-align: center;
-            padding: 40px 20px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 2px solid var(--secondary);
+            padding: 40px 20px; border-radius: 20px; margin: 50px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 2px solid white;
         }
         .card-zh { font-size: 32px; font-weight: bold; color: #333; margin-bottom: 30px; line-height: 1.4; }
         .card-en {
@@ -174,8 +154,33 @@
         }
         .btn-reveal { background: var(--text-main); color: white; }
         .btn-next { background: var(--primary); color: white; display: none; }
-        .btn-exit { background: transparent; color: #999; border: 1px solid #ddd !important; }
-        .progress { margin-top: 20px; color: #999; font-size: 14px; }
+        .btn-exit { background: transparent; color: #666; border: 1px solid #ccc !important; position: fixed; top: 20px; right: 20px; padding: 8px 15px !important; font-size: 14px !important; }
+
+        /* --- 考試 2: 填空卷 (Worksheet) --- */
+        .exam2-container {
+            max-width: 700px; margin: 40px auto;
+        }
+        .exam2-title { text-align: center; color: var(--primary); margin-bottom: 30px; font-size: 28px; }
+        
+        .quiz-card {
+            background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid var(--success);
+        }
+        .quiz-zh { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .quiz-cloze { 
+            font-size: 22px; color: #555; font-family: 'Courier New', monospace; 
+            background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1;
+        }
+        .quiz-answer {
+            margin-top: 15px; display: none; 
+            padding: 10px; background: #dcfce7; color: #166534; border-radius: 6px; 
+            font-size: 18px; font-weight: bold; cursor: pointer;
+        }
+        .btn-show-ans {
+            margin-top: 10px; padding: 5px 15px; background: #e2e8f0; color: #475569; 
+            border: none; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        .btn-show-ans:hover { background: #cbd5e1; }
 
     </style>
 </head>
@@ -188,10 +193,15 @@
         </header>
 
         <div class="controls">
-            <button class="challenge-btn" onclick="startFlashcardMode()">
-                🔥 極限挑戰 (中翻英)
+            <button class="mode-btn btn-mode1" onclick="startFlashcardMode()">
+                🔥 考試 I：口說挑戰
             </button>
-
+            <button class="mode-btn btn-mode2" onclick="startExam2Mode()">
+                📝 考試 II：填空特訓
+            </button>
+        </div>
+        
+        <div style="text-align:center; margin-bottom:20px;">
             <label class="toggle-label">
                 <input type="checkbox" id="toggle-en" onchange="toggleEnglish()"> 
                 <span style="margin-left:8px;">🙈 列表遮住英文 (考口說)</span>
@@ -201,71 +211,116 @@
         <div id="content-area"></div>
     </div>
 
-    <div class="flashcard-overlay" id="flashcard-view">
+    <div class="overlay-view" id="flashcard-view">
+        <button class="btn-exit" onclick="exitOverlay()">❌ 退出</button>
         <div class="card-box">
             <div style="color:var(--accent); font-weight:bold; margin-bottom:10px;">請翻譯成英文：</div>
-            <div class="card-zh" id="fc-zh">題目載入中...</div>
+            <div class="card-zh" id="fc-zh">題目</div>
             <div class="card-en" id="fc-en" onclick="speak(this.textContent)">Answer</div>
             <div class="fc-controls">
-                <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">👀 看英文</button>
+                <button class="btn-reveal" id="btn-reveal" onclick="revealCardAnswer()">👀 看英文</button>
                 <button class="btn-next" id="btn-next" onclick="nextCard()">下一題 ➔</button>
-            </div>
-            <div class="fc-controls" style="margin-top:20px;">
-                <button class="btn-exit" onclick="exitFlashcard()">退出模式</button>
             </div>
             <div class="progress">題數: <span id="fc-current">1</span> / <span id="fc-total">10</span></div>
         </div>
     </div>
 
+    <div class="overlay-view" id="exam2-view">
+        <button class="btn-exit" onclick="exitOverlay()">❌ 退出</button>
+        <div class="exam2-container">
+            <h2 class="exam2-title">📝 隨機填空測驗 (10題)</h2>
+            <div id="exam2-list">
+                </div>
+            <button onclick="startExam2Mode()" style="display:block; margin:30px auto; padding:15px 40px; background:var(--primary); color:white; border:none; border-radius:30px; font-size:18px; cursor:pointer;">🔄 再考一次</button>
+        </div>
+    </div>
+
     <script>
-        const examData = [
-            { category: "Check-in (辦理登機)", sentences: [ { en: "Where is the check-in counter?", zh: "登機櫃台在那裏？" }, { en: "It's in aisle 4.", zh: "它在第四走道。" }, { en: "It's at the end of the terminal.", zh: "它在航站末端。" }, { en: "Here's the economy-class check-in counter.", zh: "這邊是經濟艙櫃台。" }, { en: "We want to check in.", zh: "我要辦理登機。" }, { en: "May I see your tickets and passports?", zh: "我能看你的機票和護照嗎？" }, { en: "Here you are.", zh: "就在這裏。" }, { en: "We'd like a window seat and an aisle seat.", zh: "我要一個靠窗位子和一個靠走道位子。" }, { en: "How many bags will you check in?", zh: "你的托運行李有幾件？" }, { en: "Please put your bags on the scale.", zh: "請將行李放在磅秤上。" }, { en: "There will be an overweight-luggage charge of thirty dollars.", zh: "超重費是30元。" }, { en: "Here is your boarding card.", zh: "這是你的登機證。" }, { en: "Where is the boarding gate?", zh: "登機門在那裏？" }, { en: "You can board at gate nine at seven-thirty.", zh: "7點30分在9號門登機。" } ] },
-            { category: "Security Check (安檢)", sentences: [ { en: "Please empty out your pockets.", zh: "請把口袋掏空。" }, { en: "Please put all metal objects in this tray.", zh: "請把金屬物品放在盤子裏。" }, { en: "Please go through the metal detector.", zh: "請走過金屬探測門。" } ] },
-            { category: "Boarding (登機)", sentences: [ { en: "Flight PW-854 is now boarding.", zh: "PW-854 班機正在登機。" }, { en: "All passengers on flight PW-854 should proceed to gate nine for boarding.", zh: "PW-854 班機的旅客請到9號登機門登機。" }, { en: "All passengers seated in rows thirty-six to forty-four may now board.", zh: "36排到44排的旅客現在可以登機了。" }, { en: "May I see your boarding pass?", zh: "我可以看你的登機證嗎？" }, { en: "Our seats are at forty-three A and B.", zh: "我們的座在43排A和B。" }, { en: "I get the window seat!", zh: "我坐靠窗座位。" }, { en: "Please put the bag in the overhead compartment.", zh: "請把袋子放在置物箱。" }, { en: "Please keep your seat in the upright position.", zh: "請把椅子豎直。" } ] },
-            { category: "In-Flight Service (機上服務)", sentences: [ { en: "Please keep your seat belt fastened.", zh: "請繫好安全帶。" }, { en: "May I have a pillow and a blanket?", zh: "我能要枕頭和毛毯嗎？" }, { en: "Would you like something to drink?", zh: "你要些飲料嗎？" }, { en: "I would like a glass of orange juice.", zh: "我要一杯柳橙汁。" }, { en: "I'd like a cup of tea.", zh: "我要一杯茶。" }, { en: "Would you like the spicy chicken or the fried beef?", zh: "你要辣雞肉還是炒牛肉？" }, { en: "I'll have the chicken.", zh: "我要雞肉。" }, { en: "I am a vegetarian.", zh: "我吃素。" }, { en: "It's turbulence.", zh: "這是亂流。" } ] },
-            { category: "Immigration (入境移民局)", sentences: [ { en: "What is your last name?", zh: "你姓什麼？" }, { en: "My name is _____.", zh: "我姓 _____。" }, { en: "What is the purpose of your visit?", zh: "你此行的目的是什麼？" }, { en: "Why do you come here?", zh: "你為什麼來這裏？" }, { en: "I come here for tour.", zh: "我來旅遊。" }, { en: "How long are you staying?", zh: "你要停留多久？" }, { en: "We are staying for 2 weeks.", zh: "我們要停留2週。" }, { en: "Where are you staying?", zh: "你要住那裏？" } ] },
-            { category: "Baggage Claim (行李提領)", sentences: [ { en: "The security is tight here.", zh: "這裡的安檢很嚴。" }, { en: "The bags will come out on carousel number twelve.", zh: "行李在12號轉盤。" }, { en: "I want to report a lost bag.", zh: "我要登記一件失落行李。" }, { en: "Your suitcase is now in Tokyo.", zh: "你的行李在東京。" }, { en: "Please fill out this form.", zh: "請填表格。" } ] },
-            { category: "Customs (海關)", sentences: [ { en: "I filled out the customs-declaration forms.", zh: "我已填好海關申請單了。" }, { en: "It's our turn.", zh: "輪到我們了。" }, { en: "Please put your bags on the counter.", zh: "請把行李放在櫃台上。" }, { en: "Where are you from?", zh: "你來自那裏？" }, { en: "I am from Taiwan.", zh: "我來自台灣。" }, { en: "Here you go.", zh: "這是你要的。" }, { en: "Please open the bag.", zh: "請打開袋子。" }, { en: "Do you have any plants or meat products?", zh: "你有肉類或農產製品嗎？" }, { en: "Do you have any fruits or vegetables?", zh: "你有生鮮蔬果嗎？" }, { en: "We can take a shuttle bus.", zh: "我們可搭接駁車。" } ] },
-            { category: "Transportation (交通)", sentences: [ { en: "How do you get to school?", zh: "你如何上學？" }, { en: "I go to school by scooter.", zh: "我騎機車上學。" }, { en: "How can I get to the station?", zh: "我怎麼去車站？" }, { en: "You can take the bus to the station.", zh: "你可以搭公車去車站。" }, { en: "I'll take the MRT to the park.", zh: "我搭捷運去公園。" } ] }
+        // --- 完整資料庫 (包含填空題資訊) ---
+        // clz: 填空題題目 (Cloze), full: 完整句子
+        const fullData = [
+            { cat: "Basic Info", zh: "你來自那裏?", clz: "Where are you ______?", full: "Where are you from?" },
+            { cat: "Basic Info", zh: "請打開袋子.", clz: "Please ______ the bag.", full: "Please open the bag." },
+            { cat: "Customs", zh: "你有植物或肉類製品嗎?", clz: "Do you have any ______ or meat ______?", full: "Do you have any plants or meat products?" },
+            { cat: "Immigration", zh: "你姓什麼?", clz: "What is your ______ name?", full: "What is your last name?" },
+            { cat: "Immigration", zh: "你此行的目的是什麼?", clz: "What is the ______ of your ______?", full: "What is the purpose of your visit?" },
+            { cat: "Boarding", zh: "7點30分在9號門登機。", clz: "You can ______ at ______ 9 at ______.", full: "You can board at gate 9 at 7:30." },
+            { cat: "Boarding", zh: "PW-854 班機正在登機。", clz: "Flight PW-854 is now ______.", full: "Flight PW-854 is now boarding." },
+            { cat: "Baggage", zh: "行李在12號轉盤。", clz: "The bags will come out on ______ number ______.", full: "The bags will come out on carousel number 12." },
+            { cat: "Immigration", zh: "你要停留多久?", clz: "How ______ will you be ______?", full: "How long will you be staying?" },
+            { cat: "In-Flight", zh: "我吃素。", clz: "I am a ______.", full: "I am a vegetarian." },
+            { cat: "Basic Info", zh: "我來自台灣。", clz: "I ______ ______ Taiwan.", full: "I am from Taiwan." },
+            { cat: "Customs", zh: "你有蔬菜或水果嗎?", clz: "Do you have any ______ or ______?", full: "Do you have any fruits or vegetables?" },
+            { cat: "Transport", zh: "我們可搭接駁車。", clz: "We can ______ a ______ bus.", full: "We can take a shuttle bus." },
+            { cat: "In-Flight", zh: "我要香辣雞肉。", clz: "I'd like the ______ ______.", full: "I'd like the spicy chicken." },
+            { cat: "Security", zh: "請走過金屬探測器。", clz: "Please go ______ the ______ ______.", full: "Please go through the metal detector." },
+            { cat: "Check-in", zh: "這邊是經濟艙報到櫃台。", clz: "Here's the ______-class ______ ______ ______.", full: "Here's the economy-class check-in counter." },
+            { cat: "Check-in", zh: "請將行李放在磅秤上。", clz: "Please ______ your bags on the ______.", full: "Please put your bags on the scale." },
+            { cat: "Check-in", zh: "這是你的登機證。", clz: "Here is your ______ ______.", full: "Here is your boarding card." },
+            { cat: "Baggage", zh: "你的行李在東京。", clz: "Your ______ is now in ______.", full: "Your suitcase is now in Tokyo." },
+            { cat: "Baggage", zh: "請填寫表格。", clz: "Please ______ out this ______.", full: "Please fill out this form." },
+            { cat: "Boarding", zh: "我坐靠窗座位。", clz: "I get the ______ ______.", full: "I get the window seat." },
+            { cat: "Boarding", zh: "請把袋子放在（頭頂）置物箱。", clz: "Please put the bags in the ______ ______.", full: "Please put the bags in the overhead compartment." },
+            { cat: "In-Flight", zh: "我要一杯柳橙汁。", clz: "I'd like a ______ of orange ______.", full: "I'd like a glass of orange juice." },
+            { cat: "In-Flight", zh: "這是亂流。", clz: "It's ______.", full: "It's turbulence." },
+            { cat: "Security", zh: "請把你的物品放在盤子裏。", clz: "Please put your ______ ______ in this ______.", full: "Please put your metal objects in this tray." },
+            { cat: "Boarding", zh: "我可以看你的登機證嗎？", clz: "May I see your ______ ______?", full: "May I see your boarding pass?" },
+            { cat: "Boarding", zh: "我們的座位在43排A和B。", clz: "Our seats are ______ ______ A and B.", full: "Our seats are at 43 A and B." },
+            { cat: "Immigration", zh: "你為什麼來這裏？", clz: "______ do you ______ here?", full: "Why do you come here?" },
+            { cat: "Immigration", zh: "我來旅遊。", clz: "I come here for ______.", full: "I come here for tour." },
+            { cat: "In-Flight", zh: "我能要毛毯嗎？", clz: "______ I have a ______?", full: "May I have a blanket?" },
+            { cat: "Check-in", zh: "我能看你的機票和護照嗎？", clz: "May I see your ______ and ______?", full: "May I see your tickets and passports?" },
+            { cat: "Check-in", zh: "我要一個靠窗位子。", clz: "I'd like a ______ ______.", full: "I'd like a window seat." },
+            { cat: "Customs", zh: "請把行李放在櫃台上。", clz: "Please ______ your bags ______ the ______.", full: "Please put your bags on the counter." },
+            { cat: "Baggage", zh: "我要登記一件失落行李。", clz: "I want to ______ a ______ bag.", full: "I want to report a lost bag." },
+            { cat: "Check-in", zh: "報到櫃台在哪裏？", clz: "Where is the ______ ______?", full: "Where is the check-in counter?" },
+            { cat: "Check-in", zh: "它在第四走道。", clz: "It is ______ ______ 4.", full: "It is in aisle 4." },
+            { cat: "Check-in", zh: "我要辦理登機報到。", clz: "I want to ______ ______.", full: "I want to check in." },
+            { cat: "Customs", zh: "我已填好海關申報單了。", clz: "I filled out the ______ ______ forms.", full: "I filled out the customs declaration forms." },
+            { cat: "Customs", zh: "輪到我們了。", clz: "It's our ______.", full: "It's our turn." },
+            { cat: "Check-in", zh: "你的托運行李有幾件？", clz: "______ many bags will you ______ ______?", full: "How many bags will you check in?" },
+            { cat: "Check-in", zh: "超重費是30元。", clz: "The ______ charge is 30 dollars.", full: "The overweight-luggage charge is 30 dollars." },
+            { cat: "Boarding", zh: "登機門在哪裏？", clz: "______ is the ______ ______?", full: "Where is the boarding gate?" },
+            { cat: "Immigration", zh: "你將要住那裏？", clz: "______ will you be ______?", full: "Where will you be staying?" },
+            { cat: "Baggage", zh: "這裏的安檢很嚴。", clz: "The ______ is ______ here.", full: "The security is tight here." },
+            { cat: "In-Flight", zh: "請繫好安全帶。", clz: "Please keep your seat ______ ______.", full: "Please keep your seat belt fastened." }
         ];
 
+        // --- 初始化列表 (Dictionary Mode) ---
         const contentArea = document.getElementById('content-area');
-        examData.forEach(section => {
+        // 分類整理
+        const categories = {};
+        fullData.forEach(item => {
+            if(!categories[item.cat]) categories[item.cat] = [];
+            categories[item.cat].push(item);
+        });
+
+        for(const [cat, items] of Object.entries(categories)) {
             const sectionDiv = document.createElement('div');
-            const title = document.createElement('div');
-            title.className = 'category-title'; title.textContent = section.category;
-            sectionDiv.appendChild(title);
-            section.sentences.forEach(item => {
+            sectionDiv.innerHTML = `<div class="category-title">${cat}</div>`;
+            items.forEach(item => {
                 const row = document.createElement('div'); row.className = 'sentence-row';
                 row.innerHTML = `
-                    <div class="en-text" onclick="speak('${item.en.replace(/'/g, "\\'")}')">
+                    <div class="en-text" onclick="speak('${item.full.replace(/'/g, "\\'")}')">
                         <span class="speaker-icon">🔊</span>
-                        <span class="text-content">${item.en}</span>
+                        <span class="text-content">${item.full}</span>
                     </div>
                     <div class="zh-text">${item.zh}</div>
                 `;
                 sectionDiv.appendChild(row);
             });
             contentArea.appendChild(sectionDiv);
-        });
+        }
 
-       // --- 修正版：使用 Google 線上發音 (乾淨女聲) ---
+        // --- 共用功能 ---
         function speak(text) {
-            // 1. 先停止瀏覽器原本正在講的話
             window.speechSynthesis.cancel();
-
-            // 2. 使用 Google Translate 的語音介面 (這就是那個好聽的女聲)
             const encodedText = encodeURIComponent(text);
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodedText}`;
-            
-            // 3. 播放
             const audio = new Audio(url);
             audio.play().catch(e => {
-                // 如果 Google 連不上 (例如沒網路)，才退回去用機器人
-                console.error("Google TTS failed, fallback to robot.", e);
                 const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'en-US';
-                window.speechSynthesis.speak(u);
+                u.lang = 'en-US'; window.speechSynthesis.speak(u);
             });
         }
 
@@ -276,13 +331,17 @@
             else container.classList.remove('hide-en');
         }
 
+        function exitOverlay() {
+            document.querySelectorAll('.overlay-view').forEach(el => el.style.display = 'none');
+            document.getElementById('list-view').style.display = 'block';
+        }
+
+        // --- 考試 I: Flashcard Logic ---
         let flashcardQueue = [];
         let fcIndex = 0;
 
         function startFlashcardMode() {
-            flashcardQueue = [];
-            examData.forEach(cat => cat.sentences.forEach(s => flashcardQueue.push(s)));
-            flashcardQueue.sort(() => Math.random() - 0.5);
+            flashcardQueue = [...fullData].sort(() => Math.random() - 0.5).slice(0, 10);
             fcIndex = 0;
             document.getElementById('list-view').style.display = 'none';
             document.getElementById('flashcard-view').style.display = 'flex';
@@ -290,29 +349,49 @@
         }
 
         function showCard() {
-            if (fcIndex >= flashcardQueue.length) { alert("🎉 恭喜！你已經複習完所有句型了！"); exitFlashcard(); return; }
+            if (fcIndex >= flashcardQueue.length) { alert("🎉 考試結束！"); exitOverlay(); return; }
             const item = flashcardQueue[fcIndex];
             document.getElementById('fc-current').textContent = fcIndex + 1;
             document.getElementById('fc-total').textContent = flashcardQueue.length;
             document.getElementById('fc-zh').textContent = item.zh;
             const enBox = document.getElementById('fc-en');
-            enBox.textContent = item.en; enBox.style.display = 'none';
+            enBox.textContent = item.full; enBox.style.display = 'none';
             document.getElementById('btn-reveal').style.display = 'inline-block';
             document.getElementById('btn-next').style.display = 'none';
         }
 
-        function revealAnswer() {
+        function revealCardAnswer() {
             const enBox = document.getElementById('fc-en'); enBox.style.display = 'block';
             speak(enBox.textContent);
             document.getElementById('btn-reveal').style.display = 'none';
             document.getElementById('btn-next').style.display = 'inline-block';
         }
-
         function nextCard() { fcIndex++; showCard(); }
-        function exitFlashcard() {
-            document.getElementById('flashcard-view').style.display = 'none';
-            document.getElementById('list-view').style.display = 'block';
+
+        // --- 考試 II: Exam 2 (Cloze) Logic ---
+        function startExam2Mode() {
+            const questions = [...fullData].sort(() => Math.random() - 0.5).slice(0, 10);
+            const container = document.getElementById('exam2-list');
+            container.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+                card.innerHTML = `
+                    <div class="quiz-zh">${idx+1}. ${q.zh}</div>
+                    <div class="quiz-cloze">${q.clz}</div>
+                    <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'">👁️ 顯示答案</button>
+                    <div class="quiz-answer" onclick="speak('${q.full.replace(/'/g, "\\'")}')">
+                        ${q.full} 🔊
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('exam2-view').style.display = 'block';
         }
+
     </script>
 </body>
 </html>
